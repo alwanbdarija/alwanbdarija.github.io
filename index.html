@@ -61,7 +61,7 @@
       <h2>De quoi s'agit-il ?</h2>
       <p>Un projet de recherche : apprendre à un modèle d'intelligence artificielle les mots de couleur en darija
         <b>uniquement à partir de voix et d'images</b>, sans texte, comme un enfant qui entend « شوف الكورة الحمرا » en regardant une balle rouge.</p>
-      <p>Vous verrez <b>88 images</b> d'objets colorés, chacune avec une courte phrase à lire à voix haute. Cela prend <b>10 à 15 minutes</b>, et vous pouvez vous arrêter et reprendre plus tard.</p>
+      <p>Vous verrez <b>20 images</b> d'objets colorés, chacune avec une courte phrase à dire à voix haute. Cela prend <b>environ 3 minutes</b>. Ensuite, si vous en avez envie, vous pourrez faire 20 cartes de plus.</p>
       <h2>Vos données</h2>
       <ul>
         <li><b>Ce qui est collecté :</b> vos enregistrements vocaux, les images affichées et, si vous le souhaitez, votre tranche d'âge, votre genre et votre région. Pas de nom, pas d'adresse e-mail.</li>
@@ -127,10 +127,10 @@
   <section class="screen" id="s-done">
     <div class="card" style="text-align:center">
       <h2>شكرا بزاف ! Merci beaucoup !</h2>
-      <p>Toutes les cartes sont enregistrées.</p>
+      <p id="d-text"></p>
       <p class="muted">Votre code participant (à garder pour un éventuel retrait) :</p>
       <p class="code" id="d-code"></p>
-      <button id="b-review">Revoir mes cartes</button>
+      <div class="controls"><button class="primary" id="b-more">Encore une série</button><button id="b-review">Revoir cette série</button></div>
     </div>
   </section>
 </main>
@@ -203,18 +203,24 @@ function shade(color, rng) {
   return hslHex(h, s, l);
 }
 function promptsFor(code) {
-  const rng = rngFrom(code), prompts = [];
+  const rng = rngFrom(code), byColor = {};
   for (const color of Object.keys(COLORS)) {
     // Each colour appears once on every object, so shape never predicts colour.
-    const objects = shuffle(rng, Object.keys(OBJECTS)), light = COLORS[color][5];
-    TEMPLATES.forEach((t, i) => prompts.push({
+    const objects = shuffle(rng, Object.keys(OBJECTS)), light = COLORS[color][5], list = [];
+    TEMPLATES.forEach((t, i) => list.push({
       id: `${color}_${t}`, color, template: t, object: objects[i], hex: shade(color, rng),
       background: choice(rng, light > .9 ? ["#5f6368", "#7a7f87"] : light < .15 ? ["#f4f1ea", "#e8eef3", "#ececec"]
                                           : ["#f4f1ea", "#e8eef3", "#ececec", "#d9d9d9"]),
       count: t === "plural" ? 2 : 1, text: phrase(t, color, objects[i]),
     }));
+    byColor[color] = shuffle(rng, list);
   }
-  return shuffle(rng, prompts);
+  // Round r takes the r-th card of every colour, in a random colour order, so
+  // every series of BATCH consecutive cards contains each colour once or twice.
+  const prompts = [];
+  for (let r = 0; r < TEMPLATES.length; r++)
+    for (const color of shuffle(rng, Object.keys(COLORS))) prompts.push(byColor[color][r]);
+  return prompts;
 }
 
 // ---- Drawing --------------------------------------------------------------
@@ -278,7 +284,10 @@ function draw(p) {
 }
 
 // ---- Session --------------------------------------------------------------
-let code = "", profile = {}, prompts = [], done = new Set(), idx = 0;
+const BATCH = 20;  // cards per series
+let code = "", profile = {}, prompts = [], done = new Set(), idx = 0, batch = 0;
+const batchRange = b => [b * BATCH, Math.min(prompts.length, (b + 1) * BATCH)];
+const batchDone = b => prompts.slice(...batchRange(b)).every(p => done.has(p.id));
 let stream = null, recorder = null, chunks = [], lastUrl = null, pending = null;
 
 function show(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id)); }
@@ -297,10 +306,25 @@ async function begin(c, prof) {
   store.set("profile:" + code, profile); store.set("lastCode", code);
   done = new Set(store.get("done:" + code) || []);
   prompts = promptsFor(code);
-  idx = Math.max(0, prompts.findIndex(p => !done.has(p.id)));
   $("r-code").textContent = code; $("d-code").textContent = code;
-  show(done.size === prompts.length ? "s-done" : "s-record");
-  render();
+  const first = prompts.findIndex(p => !done.has(p.id));
+  if (first < 0) { batch = Math.ceil(prompts.length / BATCH) - 1; return finishBatch(); }
+  startBatch(Math.floor(first / BATCH));
+}
+
+function startBatch(b) {
+  batch = b;
+  const [lo, hi] = batchRange(b), first = prompts.slice(lo, hi).findIndex(p => !done.has(p.id));
+  idx = lo + Math.max(0, first);
+  show("s-record"); render();
+}
+
+function finishBatch() {
+  const more = prompts.findIndex(p => !done.has(p.id)) >= 0;
+  $("d-text").textContent = `Cette série est terminée : ${done.size} carte${done.size > 1 ? "s" : ""} enregistrée${done.size > 1 ? "s" : ""} au total.`
+    + (more ? " Si vous avez encore un peu de temps, une autre série nous aiderait beaucoup." : " Vous avez fait toutes les cartes !");
+  $("b-more").style.display = more ? "" : "none";
+  show("s-done");
 }
 
 function render() {
@@ -308,9 +332,10 @@ function render() {
   draw(p);
   if (p.text) { $("phrase").className = "phrase ar"; $("phrase").textContent = p.text; }
   else { $("phrase").className = "free"; $("phrase").innerHTML = '<span class="ar">وصف هاد التصويرة بالدارجة</span><br>Décrivez l\'image librement en darija (1 ou 2 phrases)'; }
-  $("r-count").textContent = `carte ${idx + 1} / ${prompts.length} · ${done.size} enregistrées`;
-  $("r-bar").style.width = (100 * done.size / prompts.length) + "%";
-  $("b-prev").disabled = idx === 0; $("b-next").disabled = idx === prompts.length - 1;
+  const [lo, hi] = batchRange(batch), inBatch = prompts.slice(lo, hi).filter(q => done.has(q.id)).length;
+  $("r-count").textContent = `série ${batch + 1} · carte ${idx - lo + 1} / ${hi - lo} · ${inBatch} enregistrées`;
+  $("r-bar").style.width = (100 * inBatch / (hi - lo)) + "%";
+  $("b-prev").disabled = idx === lo; $("b-next").disabled = idx === hi - 1;
   $("b-play").disabled = true; $("b-retry").style.display = "none";
   setStatus(done.has(p.id) ? "Déjà enregistrée ✓ (vous pouvez la refaire)" : "", done.has(p.id) ? "ok" : "");
 }
@@ -370,13 +395,14 @@ async function send(at) {
     return;
   }
   done.add(pending.id); store.set("done:" + code, [...done]); pending = null;
-  if (done.size === prompts.length) { setBusy(false); show("s-done"); return; }
+  if (batchDone(batch)) { setBusy(false); finishBatch(); return; }
   setStatus("Enregistré ✓", "ok");
   if (at !== idx) { setBusy(false); return; }
   setTimeout(() => {  // stay disabled until the next card is shown
     if (at === idx) {
-      const next = prompts.findIndex((q, i) => i > idx && !done.has(q.id));
-      idx = next >= 0 ? next : Math.min(idx + 1, prompts.length - 1); render();
+      const [lo, hi] = batchRange(batch), later = (q, i) => i > idx && i < hi && !done.has(q.id);
+      const next = prompts.findIndex(later), anyLeft = prompts.findIndex((q, i) => i >= lo && i < hi && !done.has(q.id));
+      idx = next >= 0 ? next : anyLeft >= 0 ? anyLeft : idx; render();
     }
     setBusy(false);
   }, 700);
@@ -396,9 +422,10 @@ $("b-resume").onclick = () => {
 $("rec").onclick = toggleRecord;
 $("b-play").onclick = () => new Audio(lastUrl).play();
 $("b-retry").onclick = () => { if (pending) { setBusy(true); send(idx); } };
-$("b-prev").onclick = () => { if (idx > 0) { idx--; render(); } };
-$("b-next").onclick = () => { if (idx < prompts.length - 1) { idx++; render(); } };
-$("b-review").onclick = () => { idx = 0; show("s-record"); render(); };
+$("b-prev").onclick = () => { if (idx > batchRange(batch)[0]) { idx--; render(); } };
+$("b-next").onclick = () => { if (idx < batchRange(batch)[1] - 1) { idx++; render(); } };
+$("b-review").onclick = () => { idx = batchRange(batch)[0]; show("s-record"); render(); };
+$("b-more").onclick = () => startBatch(Math.floor(prompts.findIndex(p => !done.has(p.id)) / BATCH));
 document.addEventListener("keydown", e => {
   if (!$("s-record").classList.contains("active") || e.target.tagName === "INPUT") return;
   if (e.code === "Space") { e.preventDefault(); toggleRecord(); }
