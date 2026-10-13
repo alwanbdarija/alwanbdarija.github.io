@@ -321,8 +321,14 @@ function mimeType() {
   return "";
 }
 
+function setBusy(busy) {  // no new recording while a clip is being sent
+  $("rec").disabled = busy;
+  $("rec").textContent = busy ? "Envoi…" : "● سجّل · Enregistrer";
+}
+
 function toggleRecord() {
   if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+  if ($("rec").disabled) return;
   chunks = [];
   const mime = mimeType();
   recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
@@ -336,7 +342,7 @@ function toggleRecord() {
 const toBase64 = blob => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result.split(",")[1]); f.readAsDataURL(blob); });
 
 async function finish() {
-  $("rec").textContent = "● سجّل · Enregistrer"; $("rec").className = "primary";
+  $("rec").className = "primary"; setBusy(true);
   const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
   if (lastUrl) URL.revokeObjectURL(lastUrl);
   lastUrl = URL.createObjectURL(blob); $("b-play").disabled = false;
@@ -360,15 +366,19 @@ async function send(at) {
   } catch (e) {
     setStatus("Échec de l'envoi : " + e.message + ". Vérifiez la connexion puis « Renvoyer ».", "err");
     $("b-retry").style.display = "";
+    setBusy(false);
     return;
   }
   done.add(pending.id); store.set("done:" + code, [...done]); pending = null;
-  if (done.size === prompts.length) { show("s-done"); return; }
+  if (done.size === prompts.length) { setBusy(false); show("s-done"); return; }
   setStatus("Enregistré ✓", "ok");
-  if (at === idx) setTimeout(() => {
-    if (at !== idx) return;
-    const next = prompts.findIndex((q, i) => i > idx && !done.has(q.id));
-    idx = next >= 0 ? next : Math.min(idx + 1, prompts.length - 1); render();
+  if (at !== idx) { setBusy(false); return; }
+  setTimeout(() => {  // stay disabled until the next card is shown
+    if (at === idx) {
+      const next = prompts.findIndex((q, i) => i > idx && !done.has(q.id));
+      idx = next >= 0 ? next : Math.min(idx + 1, prompts.length - 1); render();
+    }
+    setBusy(false);
   }, 700);
 }
 
@@ -385,7 +395,7 @@ $("b-resume").onclick = () => {
 };
 $("rec").onclick = toggleRecord;
 $("b-play").onclick = () => new Audio(lastUrl).play();
-$("b-retry").onclick = () => pending && send(idx);
+$("b-retry").onclick = () => { if (pending) { setBusy(true); send(idx); } };
 $("b-prev").onclick = () => { if (idx > 0) { idx--; render(); } };
 $("b-next").onclick = () => { if (idx < prompts.length - 1) { idx++; render(); } };
 $("b-review").onclick = () => { idx = 0; show("s-record"); render(); };
