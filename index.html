@@ -138,7 +138,7 @@
 <script>
 // ---- Configuration -------------------------------------------------------
 const UPLOAD_URL = "https://script.google.com/macros/s/AKfycbxoDLh7wQNxSAnDA9nTLLNQ2K2Q00Z3dCdeUgwfP0sDhcxsXuJ0Yd6rzUeAK8pe7vOXUg/exec";     // Google Apps Script web app URL (see apps_script/Code.gs)
-const CONTACT = "";        // contact shown in the consent text
+const CONTACT = "alwanbdarija@gmail.com";  // contact shown in the consent text
 // ---------------------------------------------------------------------------
 
 const $ = id => document.getElementById(id);
@@ -409,7 +409,11 @@ async function send(at) {
 }
 
 // ---- Wiring ---------------------------------------------------------------
-$("contact").textContent = CONTACT || "l'équipe du projet";
+if (CONTACT) {
+  const a = document.createElement("a");
+  a.href = "mailto:" + CONTACT + "?subject=" + encodeURIComponent("Alwan bdarija : suppression de mes enregistrements");
+  a.textContent = CONTACT; $("contact").replaceChildren(a);
+} else $("contact").textContent = "l'équipe du projet";
 const consentOk = () => { $("b-consent").disabled = !($("c-age").checked && $("c-ok").checked); };
 $("c-age").onchange = consentOk; $("c-ok").onchange = consentOk;
 $("b-consent").onclick = () => { show("s-profile"); const last = store.get("lastCode"); if (last) $("p-code").value = last; };
