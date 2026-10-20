@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alwan bdarija</title>
+<meta name="description" content="Alwan bdarija : prêtez votre voix en darija à un projet de recherche.">
+<style>
+  /* Light theme for everyone: a warm page, Majorelle-blue actions, neutral grey around the drawings. */
+  :root { color-scheme: light; --bg: #faf5ec; --fg: #2b2622; --muted: #6f665c; --line: #e8dfd0; --card: #ffffff;
+          --accent: #2f4bd1; --accent-fg: #ffffff; --rec: #c62828; --ok: #1f7a3a; --stage: #e6e6e6; }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); margin: 0; padding: 20px 16px 40px;
+         font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+  main { max-width: 620px; margin: 0 auto; }
+  h1 { font-size: 1.35rem; margin: 0 0 2px; }
+  .hero { border-radius: 16px; padding: 18px 16px 0; color: #fff; overflow: hidden;
+          background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'><g fill='none' stroke='%23ffffff' stroke-opacity='.22' stroke-width='1.5'><rect x='12' y='12' width='24' height='24'/><rect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/><circle cx='24' cy='24' r='5'/></g></svg>"), linear-gradient(135deg, #2f4bd1, #1d7a6e); }
+  .hero .sub { color: rgba(255,255,255,.88); font-size: .95rem; margin: 2px 0 14px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .lang { padding: 5px 10px; font-size: .85rem; flex: none; background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.45); }
+  .swatches { display: flex; height: 12px; margin: 0 -16px; }
+  .swatches span { flex: 1; }
+  .stage { background: var(--stage); border-radius: 12px; padding: 12px; }
+  html[dir=rtl] body { font-family: "Noto Naskh Arabic", "Amiri", "Geeza Pro", system-ui, sans-serif; }
+  h2 { font-size: 1.05rem; margin: 18px 0 6px; }
+  .ar { direction: rtl; font-family: "Noto Naskh Arabic", "Amiri", "Geeza Pro", sans-serif; }
+  .muted { color: var(--muted); font-size: .92rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 14px; }
+  button { font: inherit; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line);
+           background: var(--card); color: var(--fg); cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  a.button { font: inherit; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); text-decoration: none; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 600; }
+  button.recording { background: var(--rec); border-color: var(--rec); color: #fff; font-weight: 600; }
+  label { display: block; margin: 10px 0 4px; }
+  select, input[type=text] { font: inherit; width: 100%; padding: 9px 10px; border: 1px solid var(--line);
+           border-radius: 8px; background: var(--card); color: var(--fg); }
+  .check { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0; }
+  .check input { margin-top: 5px; width: 18px; height: 18px; flex: none; }
+  canvas { display: block; width: 100%; max-width: 300px; margin: 0 auto; aspect-ratio: 1; border-radius: 10px; }
+  .phrase { text-align: center; font-size: 1.75rem; line-height: 1.6; margin: 12px 0 2px; min-height: 1.6em; }
+  .free { text-align: center; font-size: 1.05rem; color: var(--muted); margin: 14px 0 8px; }
+  .progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 8px 0 0; }
+  .progress div { height: 100%; background: var(--ok); width: 0; transition: width .2s; }
+  .controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  #rec { min-width: 170px; }
+  #status { text-align: center; min-height: 1.5em; margin-top: 10px; font-size: .95rem; }
+  .ok { color: var(--ok); } .err { color: var(--rec); }
+  .warn { color: var(--rec); font-weight: 600; margin: 8px 0; }
+  .hint { text-align: center; color: var(--muted); font-size: .95rem; line-height: 1.4; margin: 4px 0; }
+  .code { font-family: ui-monospace, monospace; font-size: 1.2rem; font-weight: 700; letter-spacing: .05em; }
+  ul { padding-inline-start: 20px; }
+  kbd { border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: .8rem; }
+</style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <div class="top"><h1>Alwan bdarija · ألوان بالدارجة</h1><button id="b-lang" class="lang"></button></div>
+    <div class="sub" data-t="subtitle"></div>
+    <div class="swatches" id="swatches" aria-hidden="true"></div>
+  </header>
+
+  <!-- 1. Information and consent -->
+  <section class="screen active" id="s-consent">
+    <!-- Returning participants: continue with the code remembered on this device, or enter one.
+         One code = one person: someone else on the same device starts with a new code. -->
+    <div class="card" id="ret-known" style="display:none">
+      <h2 data-t="ret_h"></h2>
+      <div class="controls"><button class="primary" id="b-ret-continue"></button><button id="b-ret-new" data-t="ret_new"></button></div>
+    </div>
+    <div class="card" id="ret-code">
+      <h2 data-t="code_h"></h2>
+      <div class="muted" data-t="code_p"></div>
+      <div class="controls"><input type="text" id="p-code" maxlength="12" placeholder="K7Q2M9" style="max-width:180px">
+        <button id="b-resume" data-t="resume"></button></div>
+    </div>
+    <div class="card">
+      <h2 data-t="about_h"></h2>
+      <p data-t="about_p1"></p>
+      <p data-t="about_p2"></p>
+      <p class="warn" data-t="quiet"></p>
+      <h2 data-t="data_h"></h2>
+      <ul>
+        <li data-t="data_what"></li>
+        <li data-t="data_use"></li>
+        <li data-t="data_withdraw"></li>
+        <li data-t="data_age"></li>
+      </ul>
+      <div class="check"><input type="checkbox" id="c-age"><label for="c-age" data-t="c_age"></label></div>
+      <div class="check"><input type="checkbox" id="c-ok"><label for="c-ok" data-t="c_ok"></label></div>
+      <button class="primary" id="b-consent" disabled data-t="continue"></button>
+    </div>
+  </section>
+
+  <!-- 2. Optional profile, or resume with a code -->
+  <section class="screen" id="s-profile">
+    <div class="card">
+      <h2 data-t="prof_h"></h2>
+      <div class="muted" data-t="prof_p"></div>
+      <label for="p-age" data-t="age"></label>
+      <select id="p-age"><option value="">—</option><option>18-29</option><option>30-44</option><option>45-59</option><option>60+</option></select>
+      <label for="p-gender" data-t="gender"></label>
+      <select id="p-gender"><option value="">—</option><option value="f" data-t="g_f"></option><option value="m" data-t="g_m"></option><option value="x" data-t="g_x"></option></select>
+      <label for="p-vision" data-t="vision"></label>
+      <select id="p-vision"><option value="">—</option><option value="no" data-t="v_no"></option><option value="yes" data-t="v_yes"></option><option value="unsure" data-t="v_unsure"></option></select>
+      <label for="p-region" data-t="region"></label>
+      <input type="text" id="p-region" maxlength="60" data-t-placeholder="region_ph">
+      <div class="controls"><button class="primary" id="b-start" data-t="start"></button></div>
+    </div>
+  </section>
+
+  <!-- 3. Recording -->
+  <section class="screen" id="s-record">
+    <div class="warn" style="margin-top:14px; font-size:.9rem" data-t="quiet_short"></div>
+    <div class="muted"><span data-t="code_label"></span> <span class="code" id="r-code"></span> · <span id="r-count"></span></div>
+    <div class="progress"><div id="r-bar"></div></div>
+    <div class="card">
+      <div class="stage"><canvas id="canvas" width="512" height="512"></canvas></div>
+      <div id="phrase" class="phrase ar"></div>
+      <div class="controls">
+        <button id="b-prev"></button>
+        <button id="rec" class="primary"></button>
+        <button id="b-next"></button>
+      </div>
+      <div class="controls"><button id="b-play" disabled data-t="play"></button><button id="b-retry" style="display:none" data-t="retry"></button></div>
+      <div id="status" class="muted"></div>
+    </div>
+    <details class="card">
+      <summary data-t="tips_h"></summary>
+      <ul class="muted" data-t="tips"></ul>
+    </details>
+  </section>
+
+  <!-- 4. Done -->
+  <section class="screen" id="s-done">
+    <div class="card" style="text-align:center">
+      <h2 data-t="done_h"></h2>
+      <p id="d-text"></p>
+      <p class="muted" data-t="done_code"></p>
+      <p class="code" id="d-code"></p>
+      <div class="controls"><button id="b-copy" data-t="copy_code"></button><a class="button" id="b-wa" target="_blank" rel="noopener" data-t="wa_code"></a></div>
+      <div class="controls"><button class="primary" id="b-more" data-t="more"></button><button id="b-review" data-t="review"></button></div>
+      <div class="controls"><button id="b-other" data-t="other_person"></button></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ---- Configuration -------------------------------------------------------
+const UPLOAD_URL = "https://script.google.com/macros/s/AKfycbxoDLh7wQNxSAnDA9nTLLNQ2K2Q00Z3dCdeUgwfP0sDhcxsXuJ0Yd6rzUeAK8pe7vOXUg/exec";     // Google Apps Script web app URL (see apps_script/Code.gs)
+const CONTACT = "alwanbdarija@gmail.com";  // contact shown in the consent text
+// ---------------------------------------------------------------------------
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+
+// ---- Interface texts: Darija (default) and French ------------------------
+const TEXTS = {
+  ar: {
+    subtitle: "عاونّا بصوتك: سمّي الألوان والحوايج بالدارجة.",
+    about_h: "شنو هاد المشروع؟",
+    about_p1: "مشروع ديال البحث العلمي على الدارجة المغربية. كنجمعو تسجيلات ديال ناس من مناطق مختلفة كيسمّيو الألوان والحوايج بالدارجة.",
+    about_p2: "غادي تشوف <b>20 تصويرة</b> ديال حوايج ملونين، وكل وحدة معاها سؤال صغير: جاوب عليه بصوت عالي، بالدارجة وبالكلمات ديالك. كتاخد <b>شي 3 دقايق</b>. ومن بعد، إلا بغيتي، تقدر تزيد 20 أخرين.",
+    quiet: "⚠️ سجّل فبلاصة هادية: بلا تلفازة، بلا موسيقى، وبلا شي حد كيهضر حداك.",
+    quiet_short: "🔇 سجّل فبلاصة هادية",
+    ret_h: "مرحبا بيك من جديد!", ret_continue: "كمّل بالكود ديالك {code}", ret_new: "شخص آخر؟ بدا بكود جديد",
+    copy_code: "نسخ الكود", copied: "تنسخ ✓", wa_code: "صيفطو ليك فواتساب", other_person: "شخص آخر بغا يسجل؟",
+    wa_text: "الكود ديالي ف ألوان بالدارجة: {code}\n{url}",
+    no_mic: "⚠️ هاد المتصفح ما خلاناش نستعملو الميكرو. إلا حليتي الرابط من واتساب، إنستغرام ولا فيسبوك: ورك على ⋮ ولا ⋯ واختار «حل ف Chrome» ولا «حل ف Safari». ومن بعد سمح بالميكرو.",
+    q_noisy: "⚠️ كاين الصداع فهاد التسجيل. عاود سجّل فبلاصة هادية.",
+    q_novoice: "⚠️ ما سمعناش صوتك. قرّب من الميكرو، شوف واش خدام، وعاود سجّل.",
+    q_loud: "⚠️ الصوت عالي بزاف وكيتقطع. بعّد شوية من الميكرو وعاود سجّل.",
+    data_h: "المعطيات ديالك",
+    data_what: "<b>شنو كنجمعو:</b> التسجيلات ديال صوتك، التصاور اللي بانو ليك، وإلا بغيتي: شحال فعمرك تقريبا، واش راجل ولا مرا، المنطقة ديالك، وواش كتخلط بين شي ألوان. ما كنطلبوش السمية ولا الإيميل.",
+    data_use: "<b>فاش غادي يتستعملو:</b> باش نعلّمو ونجربو برامج ديال البحث، وننشرو نتائج بالأرقام. التسجيلات كتبقى محفوظة بشكل خاص، وما غاديش يتنشرو كيف ما هوما بلا ما نطلبو منك الموافقة من جديد.",
+    data_withdraw: "<b>إلا بدلتي رأيك:</b> كتاخد كود ديال المشارك. صيفطو ل {contact} ونمسحو التسجيلات ديالك.",
+    data_age: "خاصك تكون <b>عندك 18 عام ولا كثر</b>.",
+    c_age: "عندي 18 عام ولا كثر.",
+    c_ok: "قريت هاد المعلومات، وموافق(ة) باش التسجيلات ديالي يتستعملو فهاد البحث.",
+    continue: "كمّل",
+    prof_h: "شي أسئلة (ماشي ضروري)",
+    prof_p: "كيعاونونا نعرفو واش البرنامج كيفهم كاع اللهجات.",
+    age: "شحال فعمرك", gender: "الجنس", g_f: "مرا", g_m: "راجل", g_x: "ما بغيتش نقول",
+    vision: "واش كتخلط بين شي ألوان (مثلا الحمر والخضر)؟", v_no: "لا", v_yes: "آه", v_unsure: "ما عرفتش",
+    region: "المدينة ولا المنطقة اللي تربيتي فيها", region_ph: "مثلا: فاس، كازا، سوس…",
+    start: "بدا التسجيل",
+    code_h: "عندك ديجا كود؟", code_p: "باش تكمّل من تيليفون ولا بيسي آخر، دخّل الكود ديالك.", resume: "كمّل",
+    code_label: "الكود ديالك:",
+    count: "السلسلة {b} · البطاقة {i} / {n} · تسجلو {k}",
+    rec: "● سجّل", stop: "■ وقّف", sending: "كنصيفطو…", play: "▶ عاود سمع", retry: "↻ عاود صيفط",
+    prev: "→", next: "←",
+    tips_h: "نصائح",
+    tips: "<li>بلاصة هادية، والتيليفون ولا الميكرو على بعد شي 20 سنتيم.</li>"
+        + "<li>ورك على «سجّل»، تسنى شوية، هضر، ومن بعد ورك على «وقّف».</li>"
+        + "<li>جاوب بالكلمات اللي كتستعمل عادة: ما كاينش جواب غالط.</li>"
+        + "<li>«وصف التصويرة»: هضر على التصويرة بالدارجة كيف بغيتي، جملة ولا جوج.</li>"
+        + "<li>فالبيسي: <kbd>Espace</kbd> باش تسجل وتوقف، والفليشات باش تدوز.</li>",
+    hint_colour: "قول سمية هاد اللون بالكلمة اللي كتستعمل عادة", hint_object: "قول سمية هاد الحاجة بالكلمة اللي كتستعمل عادة",
+    hint_both: "قول شنو هي هاد الحاجة واللون ديالها، بالكلمات ديالك", hint_plural: "قول شنو كتشوف فهاد التصويرة، بالكلمات ديالك",
+    free: "هضر على هاد التصويرة بالدارجة كيف بغيتي، جملة ولا جوج",
+    already: "مسجلة ✓ (تقدر تعاودها)", recording: "كنسجلو… هضر، ومن بعد ورك على «وقّف».",
+    saved: "تسجلات ✓", fail: "ما تصيفطاتش ({e}). شوف الكونيكسيون، ومن بعد ورك على «عاود صيفط».",
+    not_configured: "الموقع مازال ما واجدش", refused: "ترفضات",
+    mic: "خاص الميكرو باش تشارك.", bad_code: "الكود فيه 6 ديال الحروف والأرقام.",
+    done_h: "شكرا بزاف!", done_text: "سالات هاد السلسلة: سجلتي {n} بطاقة فالمجموع.",
+    done_more: " إلا عندك شوية د الوقت، سلسلة أخرى غادي تعاونا بزاف.", done_all: " كمّلتي كاع البطاقات!",
+    done_code: "الكود ديالك (خليه عندك إلا بغيتي من بعد نمسحو التسجيلات ديالك):",
+    more: "سلسلة أخرى", review: "شوف هاد السلسلة", team: "الفريق ديال المشروع", other_lang: "Français",
+  },
+  fr: {
+    subtitle: "Prêtez votre voix : nommez des couleurs et des objets en darija.",
+    about_h: "De quoi s'agit-il ?",
+    about_p1: "Un projet de recherche scientifique sur la darija marocaine. Nous collectons des enregistrements de personnes de différentes régions qui nomment des couleurs et des objets en darija.",
+    about_p2: "Vous verrez <b>20 images</b> d'objets colorés, chacune avec une petite question : répondez à voix haute, en darija, avec vos propres mots. Cela prend <b>environ 3 minutes</b>. Ensuite, si vous en avez envie, vous pourrez faire 20 cartes de plus.",
+    quiet: "⚠️ Enregistrez dans un endroit calme : sans télévision, sans musique, sans personne qui parle autour de vous.",
+    quiet_short: "🔇 Enregistrez dans un endroit calme",
+    ret_h: "Bon retour !", ret_continue: "Continuer avec votre code {code}", ret_new: "Une autre personne ? Commencer avec un nouveau code",
+    copy_code: "Copier le code", copied: "Copié ✓", wa_code: "Me l'envoyer sur WhatsApp", other_person: "Une autre personne veut enregistrer ?",
+    wa_text: "Mon code Alwan bdarija : {code}\n{url}",
+    no_mic: "⚠️ Ce navigateur ne nous laisse pas utiliser le micro. Si vous avez ouvert le lien depuis WhatsApp, Instagram ou Facebook : touchez ⋮ ou ⋯ et choisissez « Ouvrir dans Chrome » ou « Ouvrir dans Safari », puis autorisez le micro.",
+    q_noisy: "⚠️ Cet enregistrement est bruité. Refaites-le dans un endroit plus calme.",
+    q_novoice: "⚠️ Nous n'avons pas entendu votre voix. Rapprochez-vous du micro, vérifiez qu'il fonctionne, puis recommencez.",
+    q_loud: "⚠️ Le son sature. Éloignez-vous un peu du micro et refaites l'enregistrement.",
+    data_h: "Vos données",
+    data_what: "<b>Ce qui est collecté :</b> vos enregistrements vocaux, les images affichées et, si vous le souhaitez, votre tranche d'âge, votre genre, votre région et si vous confondez certaines couleurs. Pas de nom, pas d'adresse e-mail.",
+    data_use: "<b>Usage :</b> entraîner et évaluer des modèles de recherche et publier des résultats chiffrés. Les enregistrements sont stockés de façon privée et ne seront pas publiés tels quels sans un nouvel accord.",
+    data_withdraw: "<b>Retrait :</b> vous recevez un code participant. Envoyez-le à {contact} pour que vos enregistrements soient supprimés.",
+    data_age: "Réservé aux personnes de <b>18 ans ou plus</b>.",
+    c_age: "J'ai 18 ans ou plus.",
+    c_ok: "J'ai lu ces informations et j'accepte que mes enregistrements soient utilisés pour cette recherche.",
+    continue: "Continuer",
+    prof_h: "Quelques questions (facultatives)",
+    prof_p: "Elles aident à savoir si le modèle comprend tous les accents.",
+    age: "Tranche d'âge", gender: "Genre", g_f: "Femme", g_m: "Homme", g_x: "Je préfère ne pas dire",
+    vision: "Confondez-vous certaines couleurs (par exemple le rouge et le vert) ?", v_no: "Non", v_yes: "Oui", v_unsure: "Je ne sais pas",
+    region: "Ville ou région où vous avez grandi", region_ph: "ex. Fès, Casablanca, Souss…",
+    start: "Commencer l'enregistrement",
+    code_h: "Vous avez déjà un code ?", code_p: "Pour reprendre sur un autre appareil, entrez votre code participant.", resume: "Reprendre",
+    code_label: "Code participant :",
+    count: "série {b} · carte {i} / {n} · {k} enregistrées",
+    rec: "● Enregistrer", stop: "■ Arrêter", sending: "Envoi…", play: "▶ Réécouter", retry: "↻ Renvoyer",
+    prev: "←", next: "→",
+    tips_h: "Conseils",
+    tips: "<li>Endroit calme, téléphone ou micro à environ 20 cm.</li>"
+        + "<li>Appuyez sur Enregistrer, attendez une demi-seconde, parlez, puis appuyez sur Arrêter.</li>"
+        + "<li>Répondez avec les mots que vous utilisez d'habitude : il n'y a pas de mauvaise réponse.</li>"
+        + "<li>« Décrivez l'image » : parlez librement de l'image en darija, en une ou deux phrases.</li>"
+        + "<li>Sur ordinateur : <kbd>Espace</kbd> pour enregistrer et arrêter, les flèches pour naviguer.</li>",
+    hint_colour: "Dites le nom de cette couleur, avec le mot que vous utilisez d'habitude", hint_object: "Dites le nom de cet objet, avec le mot que vous utilisez d'habitude",
+    hint_both: "Dites ce que c'est et de quelle couleur, avec vos mots", hint_plural: "Dites ce que vous voyez sur l'image, avec vos mots",
+    free: "Décrivez l'image librement en darija, en 1 ou 2 phrases",
+    already: "Déjà enregistrée ✓ (vous pouvez la refaire)", recording: "Enregistrement… parlez, puis appuyez sur Arrêter.",
+    saved: "Enregistré ✓", fail: "Échec de l'envoi ({e}). Vérifiez la connexion puis « Renvoyer ».",
+    not_configured: "site pas encore configuré", refused: "refusé",
+    mic: "Le micro est nécessaire pour participer.", bad_code: "Le code fait 6 caractères (lettres et chiffres).",
+    done_h: "Merci beaucoup !", done_text: "Cette série est terminée : {n} cartes enregistrées au total.",
+    done_more: " Si vous avez encore un peu de temps, une autre série nous aiderait beaucoup.", done_all: " Vous avez fait toutes les cartes !",
+    done_code: "Votre code participant (à garder pour un éventuel retrait) :",
+    more: "Encore une série", review: "Revoir cette série", team: "l'équipe du projet", other_lang: "الدارجة",
+  },
+};
+let lang = store.get("lang") === "fr" ? "fr" : "ar";
+const t = (key, vars = {}) => TEXTS[lang][key].replace(/\{(\w+)\}/g, (_, k) => vars[k]);
+function contactHtml() {
+  if (!CONTACT) return t("team");
+  const subject = encodeURIComponent(lang === "ar" ? "ألوان بالدارجة: نمسحو التسجيلات ديالي" : "Alwan bdarija : suppression de mes enregistrements");
+  return `<a href="mailto:${CONTACT}?subject=${subject}">${CONTACT}</a>`;
+}
+function applyLang() {
+  document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach(el => { el.innerHTML = t(el.dataset.t, { contact: contactHtml() }); });
+  document.querySelectorAll("[data-t-placeholder]").forEach(el => { el.placeholder = t(el.dataset.tPlaceholder); });
+  $("b-lang").textContent = t("other_lang");
+  $("b-prev").textContent = t("prev"); $("b-next").textContent = t("next");
+  if (!recorder || recorder.state !== "recording") setBusy($("rec").disabled);
+  if ($("s-record").classList.contains("active")) render();
+  if ($("s-done").classList.contains("active")) finishBatch();
+  renderReturning();
+  $("b-wa").href = "https://wa.me/?text=" + encodeURIComponent(t("wa_text", { code: code || "", url: location.origin + location.pathname }));
+}
+function renderReturning() {
+  const last = store.get("lastCode");
+  $("ret-known").style.display = last ? "" : "none";
+  $("ret-code").style.display = last ? "none" : "";
+  if (last) $("b-ret-continue").textContent = t("ret_continue", { code: last });
+}
+
+// ---- Prompts --------------------------------------------------------------
+// name: [masculine, feminine, plural, hue, saturation, lightness]; the word forms are not shown,
+// they document the expected answers for the analysis
+const COLORS = {
+  red: ["حمر", "حمرا", "حومر", 0, .80, .48], blue: ["زرق", "زرقا", "زورق", 220, .75, .48],
+  green: ["خضر", "خضرا", "خوضر", 125, .60, .40], yellow: ["صفر", "صفرا", "صوفر", 52, .95, .55],
+  black: ["كحل", "كحلا", "كوحل", 0, 0, .08], white: ["بيض", "بيضا", "بيوض", 0, 0, .97],
+  orange: ["ليموني", "ليمونية", "ليمونيين", 28, .95, .52], pink: ["وردي", "وردية", "ورديين", 330, .80, .75],
+  purple: ["موف", "موف", "موف", 275, .55, .45], brown: ["قهوي", "قهوية", "قهويين", 25, .55, .28],
+  grey: ["رمادي", "رمادية", "رماديين", 0, 0, .55],
+};
+// shape: [singular, plural, feminine]
+const OBJECTS = {
+  ball: ["كورة", "كورات", true], star: ["نجمة", "نجمات", true], fish: ["حوتة", "حوتات", true],
+  house: ["دار", "ديور", true], car: ["طوموبيل", "طوموبيلات", true], umbrella: ["مظلة", "مظلات", true],
+  cap: ["كاسكيطة", "كاسكيطات", true], plane: ["طيارة", "طيارات", true],
+  tshirt: ["تيشورت", "تيشورتات", false], shoe: ["صباط", "صبابط", false], key: ["ساروت", "سوارت", false],
+  bag: ["صاك", "صاكات", false], chair: ["كرسي", "كراسا", false], cup: ["كاس", "كيسان", false],
+  phone: ["تيليفون", "تيليفونات", false], pen: ["ستيلو", "ستيلوات", false],
+};
+// Cards ask a question; nobody is given words to read, so answers are spontaneous Darija.
+// template: [question shown, hint key]
+const QUESTIONS = {
+  question: ["شنو هاد اللون؟", "hint_colour"],
+  object_question: ["شنو هادشي؟", "hint_object"],
+  both_question: ["شنو هادشي، وشنو اللون ديالو؟", "hint_both"],
+  plural_question: ["شنو كتشوف؟", "hint_plural"],  // two objects drawn: invites plural forms
+  free: ["وصف هاد التصويرة", "free"],
+};
+const SERIES = { question: 4, object_question: 4, both_question: 7, plural_question: 3, free: 2 };  // 20 cards
+const N_SERIES = 5;
+const VERSION = "v13-cup-pen";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
+// Colour-object pairs reserved for the generalisation test: recorded like the others but never
+// used for training (each colour and object is still trained in other pairs). Fixed before collection.
+const HELD_OUT = ["red_chair", "blue_phone", "green_umbrella", "yellow_shoe", "black_cap", "white_car",
+                  "orange_key", "pink_bag", "purple_house", "brown_star", "grey_plane"];
+
+function rngFrom(seed) {  // mulberry32 seeded by a string hash
+  let h = 1779033703;
+  for (const ch of seed) h = Math.imul(h ^ ch.charCodeAt(0), 3432918353), h = (h << 13) | (h >>> 19);
+  return () => {
+    h = (h + 0x6D2B79F5) | 0;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const uniform = (rng, a, b) => a + (b - a) * rng();
+const choice = (rng, xs) => xs[Math.floor(rng() * xs.length)];
+function shuffle(rng, xs) {
+  for (let i = xs.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [xs[i], xs[j]] = [xs[j], xs[i]]; }
+  return xs;
+}
+function hslHex(h, s, l) {
+  const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = n => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1))));
+  return "#" + [f(0), f(8), f(4)].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+// Shade ranges per colour [hue, saturation, lightness]. Centres follow the focal ("best example")
+// colours of Berlin & Kay (1969) for English and Arabic where both agree (red, green, blue, purple,
+// brown; see EXPERIENCE.md), and are tight enough that no shade of one colour looks like another:
+// every pair of colours stays above ΔE 30 (CIELAB).
+const SHADES = {
+  red: [[-5, 4], [.70, .85], [.39, .46]], orange: [[25, 31], [.92, 1], [.52, .58]], yellow: [[49, 54], [.95, 1], [.50, .56]],
+  brown: [[20, 28], [.50, .62], [.22, .28]], pink: [[325, 340], [.7, .9], [.72, .80]], purple: [[274, 286], [.42, .55], [.31, .38]],
+  blue: [[198, 207], [.85, 1], [.36, .43]], green: [[134, 146], [.60, .75], [.27, .34]], black: [[0, 0], [0, 0], [.03, .07]],
+  white: [[0, 0], [0, 0], [.95, .99]], grey: [[0, 0], [0, 0], [.50, .60]],
+};
+function shade(color, rng) {
+  const [[h0, h1], [s0, s1], [l0, l1]] = SHADES[color];
+  return hslHex((uniform(rng, h0, h1) + 360) % 360, uniform(rng, s0, s1), uniform(rng, l0, l1));
+}
+// Balanced grid of the 11 x 16 = 176 colour-object pairs: pair i is (colour i mod 11, object i mod 16).
+// As 11 and 16 are coprime, the 176 indices give every pair exactly once, and any 20 consecutive
+// indices contain all 11 colours and all 16 objects. Each participant starts at a random index, so
+// over participants every pair, and every colour with masculine and feminine nouns, is recorded equally.
+function promptsFor(code) {
+  const rng = rngFrom(code), colors = Object.keys(COLORS), objects = Object.keys(OBJECTS);
+  const total = colors.length * objects.length, start = Math.floor(rng() * total), prompts = [];
+  const templates = Object.entries(SERIES).flatMap(([t, n]) => Array(n).fill(t));
+  for (let k = 0; k < N_SERIES; k++) {
+    const kinds = shuffle(rng, [...templates]), cards = [];
+    for (let j = 0; j < templates.length; j++) {
+      const i = (start + k * templates.length + j) % total;
+      cards.push(makeCard({ t: kinds[j], color: colors[i % colors.length], object: objects[i % objects.length], grid: i }, rng));
+    }
+    prompts.push(...shuffle(rng, cards));  // display order mixed within the series
+  }
+  return prompts;
+}
+
+function makeCard({ t, color, object, grid }, rng) {
+  const light = COLORS[color][5];
+  return {
+    id: `${color}_${object}_${t}`, color, template: t, object, gender: OBJECTS[object][2] ? "f" : "m",
+    hex: shade(color, rng),
+    background: choice(rng, light > .9 ? ["#5f6368", "#7a7f87"] : light < .15 ? ["#f4f1ea", "#e8eef3", "#ececec"]
+                                        : ["#f4f1ea", "#e8eef3", "#ececec", "#d9d9d9"]),
+    count: t === "plural_question" ? 2 : 1, text: QUESTIONS[t][0],
+    grid, held_out: HELD_OUT.includes(`${color}_${object}`), version: VERSION,
+  };
+}
+
+// ---- Drawing --------------------------------------------------------------
+const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const adjust = (hex, a) => "rgb(" + rgb(hex).map(c => Math.round(a < 0 ? c * (1 + a) : c + (255 - c) * a)).join(",") + ")";
+const luminance = hex => { const [r, g, b] = rgb(hex); return (.299 * r + .587 * g + .114 * b) / 255; };
+// Inner shading stays within ±6 % of the colour: a darker orange reads as brown, a lighter red as pink.
+// The structure of each object (roof, wheels, straps…) is given by the grey outlines.
+const SHAPES = {
+  // A cap, not a bowl or a helmet: big rounded crown with seams and button, wide curved visor attached at the front.
+  cap(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    c.fillStyle = col;
+    c.beginPath(); c.moveTo(...P(-.4, .14)); c.bezierCurveTo(...P(-.44, -.34), ...P(.24, -.4), ...P(.3, .1));
+    c.quadraticCurveTo(...P(-.04, .22), ...P(-.4, .14)); c.closePath(); c.fill(); c.stroke();                       // crown
+    c.beginPath(); c.moveTo(...P(-.06, -.3)); c.quadraticCurveTo(...P(-.26, -.12), ...P(-.24, .16));
+    c.moveTo(...P(-.06, -.3)); c.quadraticCurveTo(...P(.1, -.1), ...P(.08, .16)); c.stroke();                        // seams
+    c.beginPath(); c.arc(...P(-.2, -.06), .02 * s, 0, 2 * Math.PI); c.stroke();                                     // eyelet
+    c.fillStyle = adjust(col, -.06);
+    c.beginPath(); c.arc(...P(-.06, -.31), .04 * s, 0, 2 * Math.PI); c.fill(); c.stroke();                           // button
+    c.beginPath(); c.moveTo(...P(.04, .15)); c.quadraticCurveTo(...P(.2, .08), ...P(.3, .1));
+    c.quadraticCurveTo(...P(.56, .12), ...P(.6, .24)); c.quadraticCurveTo(...P(.4, .34), ...P(.04, .15));
+    c.closePath(); c.fill(); c.stroke();                                                                             // visor
+  },
+  // A plane in profile: fuselage, wing, tail fin, windows (outlined only).
+  plane(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    const poly = (...pts) => { c.beginPath(); pts.forEach(([u, v], i) => (i ? c.lineTo : c.moveTo).call(c, ...P(u, v))); c.closePath(); c.fill(); c.stroke(); };
+    c.fillStyle = adjust(col, -.06);
+    poly([.02, .02], [.16, .02], [-.06, -.34], [-.16, -.34]);                     // far wing
+    poly([-.34, -.02], [-.24, -.02], [-.36, -.26], [-.44, -.26]);                  // tail fin
+    c.fillStyle = col;
+    c.beginPath(); c.moveTo(...P(-.44, -.06)); c.lineTo(...P(.3, -.06)); c.quadraticCurveTo(...P(.48, -.04), ...P(.48, .02));
+    c.quadraticCurveTo(...P(.46, .1), ...P(.3, .1)); c.lineTo(...P(-.38, .1)); c.quadraticCurveTo(...P(-.46, .1), ...P(-.44, -.06));
+    c.closePath(); c.fill(); c.stroke();                                          // fuselage
+    poly([-.02, .04], [.14, .04], [-.1, .36], [-.22, .36]);                       // near wing
+    c.beginPath(); for (const u of [-.2, -.1, 0, .1, .2]) { c.moveTo(...P(u + .03, -.01)); c.arc(...P(u, -.01), .03 * s, 0, 2 * Math.PI); } c.stroke();
+  },
+  // A desk telephone: base with dial, handset resting on top (a phone without a screen, so a single colour).
+  phone(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    c.fillStyle = col;
+    c.beginPath(); c.moveTo(...P(-.3, -.04)); c.lineTo(...P(.3, -.04)); c.lineTo(...P(.4, .32)); c.lineTo(...P(-.4, .32)); c.closePath(); c.fill(); c.stroke();  // base
+    c.beginPath(); c.arc(...P(0, .15), .12 * s, 0, 2 * Math.PI); c.stroke();                                       // dial
+    c.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; c.moveTo(...P(.08 * Math.cos(a) + .015, .15 + .08 * Math.sin(a))); c.arc(...P(.08 * Math.cos(a), .15 + .08 * Math.sin(a)), .015 * s, 0, 2 * Math.PI); } c.stroke();
+    c.fillStyle = adjust(col, .06);
+    c.beginPath(); c.moveTo(...P(-.44, -.1)); c.quadraticCurveTo(...P(-.46, -.26), ...P(-.3, -.26)); c.lineTo(...P(.3, -.26));
+    c.quadraticCurveTo(...P(.46, -.26), ...P(.44, -.1)); c.lineTo(...P(.3, -.06)); c.quadraticCurveTo(...P(.26, -.14), ...P(.18, -.14));
+    c.lineTo(...P(-.18, -.14)); c.quadraticCurveTo(...P(-.26, -.14), ...P(-.3, -.06)); c.closePath(); c.fill(); c.stroke();  // handset
+  },
+  // A teacup on its saucer (a mug was read as a jug): flared cup, small handle, saucer, same colour.
+  cup(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s], stroke = c.strokeStyle, lw = c.lineWidth;
+    c.fillStyle = adjust(col, -.04);
+    c.beginPath(); c.ellipse(...P(0, .2), .42 * s, .09 * s, 0, 0, 2 * Math.PI); c.fill(); c.stroke();              // saucer
+    c.lineWidth = lw * 4.5; c.beginPath(); c.arc(...P(.27, -.02), .09 * s, -Math.PI / 2, Math.PI / 2); c.stroke();
+    c.lineWidth = lw * 2.5; c.strokeStyle = col; c.beginPath(); c.arc(...P(.27, -.02), .09 * s, -Math.PI / 2, Math.PI / 2); c.stroke();
+    c.lineWidth = lw; c.strokeStyle = stroke;                                                                       // handle
+    c.fillStyle = col;
+    c.beginPath(); c.moveTo(...P(-.3, -.14)); c.lineTo(...P(.3, -.14));
+    c.bezierCurveTo(...P(.3, .06), ...P(.18, .18), ...P(0, .18)); c.bezierCurveTo(...P(-.18, .18), ...P(-.3, .06), ...P(-.3, -.14));
+    c.closePath(); c.fill(); c.stroke();                                                                            // cup
+    c.fillStyle = adjust(col, -.06); c.beginPath(); c.ellipse(...P(0, -.14), .3 * s, .055 * s, 0, 0, 2 * Math.PI); c.fill(); c.stroke();  // rim
+  },
+  // A pen in writing position (an upward pen was read as a rocket): tip pointing down, small black point,
+  // grip, body and cap with clip; tilted like a hand holds it.
+  pen(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    c.save(); c.translate(x, y); c.rotate(.45); c.scale(1.3, 1.3); c.translate(-x, -y);
+    c.fillStyle = adjust(col, -.05); c.beginPath(); c.rect(...P(-.075, -.46), .15 * s, .26 * s); c.fill(); c.stroke();   // cap
+    c.beginPath(); c.rect(...P(.075, -.42), .035 * s, .2 * s); c.fill(); c.stroke();                                     // clip
+    c.fillStyle = col; c.beginPath(); c.rect(...P(-.065, -.2), .13 * s, .42 * s); c.fill(); c.stroke();                  // body
+    c.fillStyle = adjust(col, .05); c.beginPath(); c.rect(...P(-.065, .22), .13 * s, .08 * s); c.fill(); c.stroke();     // grip
+    c.fillStyle = col; c.beginPath(); c.moveTo(...P(-.065, .3)); c.lineTo(...P(.065, .3)); c.lineTo(...P(.012, .42));
+    c.lineTo(...P(-.012, .42)); c.closePath(); c.fill(); c.stroke();                                                     // cone
+    c.fillStyle = "#111"; c.beginPath(); c.moveTo(...P(-.012, .42)); c.lineTo(...P(.012, .42)); c.lineTo(...P(0, .47));
+    c.closePath(); c.fill(); c.stroke();                                                                                 // black point
+    c.restore();
+  },
+  // A ball, not a circle: shaded volume, seams, shadow on the ground.
+  ball(c, x, y, s, col) {
+    const R = s * .4, stroke = c.strokeStyle;
+    c.fillStyle = "rgba(0, 0, 0, .16)"; c.beginPath(); c.ellipse(x, y + R * 1.05, R * .8, R * .14, 0, 0, 2 * Math.PI); c.fill();
+    const g = c.createRadialGradient(x - R * .35, y - R * .4, R * .1, x, y, R);
+    g.addColorStop(0, adjust(col, 0.06)); g.addColorStop(1, adjust(col, -0.06));
+    c.fillStyle = g; c.beginPath(); c.arc(x, y, R, 0, 2 * Math.PI); c.fill();
+    c.save(); c.clip(); c.strokeStyle = stroke; c.lineWidth *= .8;
+    c.beginPath(); c.moveTo(x, y - R); c.lineTo(x, y + R); c.moveTo(x - R, y); c.lineTo(x + R, y); c.stroke();  // basketball seams
+    c.beginPath(); c.arc(x - R * 1.3, y, R * .95, -Math.PI / 2, Math.PI / 2); c.stroke();
+    c.beginPath(); c.arc(x + R * 1.3, y, R * .95, Math.PI / 2, 3 * Math.PI / 2); c.stroke();
+    c.restore();
+    c.beginPath(); c.arc(x, y, R, 0, 2 * Math.PI); c.stroke();
+  },
+  star(c, x, y, s) {
+    c.beginPath();
+    for (let i = 0; i < 10; i++) { const r = i % 2 ? s * .2 : s * .46, a = -Math.PI / 2 + i * Math.PI / 5; c.lineTo(x + r * Math.cos(a), y + r * Math.sin(a)); }
+    c.closePath(); c.fill(); c.stroke();
+  },
+  fish(c, x, y, s) {
+    c.beginPath(); c.moveTo(x + s * .18, y); c.lineTo(x + s * .46, y - s * .2); c.lineTo(x + s * .46, y + s * .2); c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.ellipse(x - s * .06, y, s * .32, s * .2, 0, 0, 2 * Math.PI); c.fill(); c.stroke();
+    c.fillStyle = "#222"; c.beginPath(); c.arc(x - s * .24, y - s * .05, s * .03, 0, 2 * Math.PI); c.fill();
+  },
+  house(c, x, y, s, col) {
+    c.beginPath(); c.rect(x - s * .3, y - s * .05, s * .6, s * .42); c.fill(); c.stroke();
+    c.fillStyle = adjust(col, -0.06);
+    c.beginPath(); c.moveTo(x - s * .4, y - s * .05); c.lineTo(x, y - s * .42); c.lineTo(x + s * .4, y - s * .05); c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.rect(x - s * .07, y + s * .15, s * .14, s * .22); c.fill(); c.stroke();
+  },
+  // u, v: coordinates in units of the object size s, centred on (x, y)
+  car(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    c.beginPath(); c.moveTo(...P(-.26, -.04)); c.lineTo(...P(-.15, -.24)); c.lineTo(...P(.13, -.24)); c.lineTo(...P(.27, -.04));
+    c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.rect(...P(-.46, -.05), .92 * s, .23 * s); c.fill(); c.stroke();
+    c.fillStyle = adjust(col, 0.06);
+    c.beginPath(); c.moveTo(...P(-.21, -.06)); c.lineTo(...P(-.13, -.2)); c.lineTo(...P(-.02, -.2)); c.lineTo(...P(-.02, -.06)); c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(...P(.02, -.06)); c.lineTo(...P(.02, -.2)); c.lineTo(...P(.11, -.2)); c.lineTo(...P(.21, -.06)); c.closePath(); c.fill(); c.stroke();
+    for (const u of [-.26, .26]) {
+      c.fillStyle = adjust(col, -0.06); c.beginPath(); c.arc(...P(u, .18), .1 * s, 0, 2 * Math.PI); c.fill(); c.stroke();
+      c.fillStyle = adjust(col, 0.06); c.beginPath(); c.arc(...P(u, .18), .04 * s, 0, 2 * Math.PI); c.fill();
+    }
+  },
+  umbrella(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s], R = .44 * s, r = R / 4;
+    c.save(); c.strokeStyle = adjust(col, -0.06); c.lineWidth *= 3;
+    c.beginPath(); c.moveTo(...P(0, -.05)); c.lineTo(...P(0, .34)); c.arc(...P(.06, .34), .06 * s, Math.PI, 0, true); c.stroke(); c.restore();
+    c.beginPath(); c.moveTo(...P(-.44, -.02)); c.arc(...P(0, -.02), R, Math.PI, 2 * Math.PI);
+    for (let i = 0; i < 4; i++) c.arc(x + R - r * (2 * i + 1), y - .02 * s, r, 0, Math.PI, true);
+    c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(...P(0, -.46)); c.lineTo(...P(0, -.52)); c.stroke();
+  },
+  tshirt(c, x, y, s) {
+    const pts = [[-.1, -.32], [-.24, -.3], [-.46, -.12], [-.36, 0], [-.24, -.08], [-.24, .36], [.24, .36],
+                 [.24, -.08], [.36, 0], [.46, -.12], [.24, -.3], [.1, -.32]];
+    c.beginPath(); pts.forEach(([u, v], i) => (i ? c.lineTo : c.moveTo).call(c, x + u * s, y + v * s));
+    c.quadraticCurveTo(x, y - .2 * s, x - .1 * s, y - .32 * s); c.closePath(); c.fill(); c.stroke();
+  },
+  shoe(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    c.beginPath(); c.moveTo(...P(-.44, .14)); c.lineTo(...P(-.44, -.06)); c.quadraticCurveTo(...P(-.42, -.2), ...P(-.3, -.2));
+    c.lineTo(...P(-.08, -.2)); c.lineTo(...P(0, -.06)); c.quadraticCurveTo(...P(.32, -.04), ...P(.44, .08)); c.lineTo(...P(.44, .14));
+    c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = adjust(col, 0.06); c.beginPath(); c.rect(...P(-.46, .14), .92 * s, .09 * s); c.fill(); c.stroke();
+    c.beginPath(); for (const u of [.04, .12, .2]) { c.moveTo(...P(u - .03, -.05)); c.lineTo(...P(u + .03, .02)); } c.stroke();
+  },
+  key(c, x, y, s, col, bg) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    c.beginPath(); c.rect(...P(-.12, -.05), .54 * s, .1 * s); c.rect(...P(.22, .05), .06 * s, .1 * s); c.rect(...P(.33, .05), .06 * s, .15 * s);
+    c.fill(); c.stroke();
+    c.beginPath(); c.arc(...P(-.26, 0), .17 * s, 0, 2 * Math.PI); c.fill(); c.stroke();
+    c.fillStyle = bg; c.beginPath(); c.arc(...P(-.29, 0), .06 * s, 0, 2 * Math.PI); c.fill(); c.stroke();
+  },
+  // A handbag, not an envelope: rounded body, thick handle fixed on both sides, clasp; no flap.
+  bag(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s], stroke = c.strokeStyle, lw = c.lineWidth;
+    c.lineWidth = lw * 4.5; c.strokeStyle = stroke;
+    c.beginPath(); c.moveTo(...P(-.2, -.08)); c.bezierCurveTo(...P(-.2, -.46), ...P(.2, -.46), ...P(.2, -.08)); c.stroke();
+    c.lineWidth = lw * 2.5; c.strokeStyle = adjust(col, -0.06);
+    c.beginPath(); c.moveTo(...P(-.2, -.08)); c.bezierCurveTo(...P(-.2, -.46), ...P(.2, -.46), ...P(.2, -.08)); c.stroke();
+    c.lineWidth = lw; c.strokeStyle = stroke;
+    c.fillStyle = col; c.beginPath(); c.moveTo(...P(-.3, -.08)); c.lineTo(...P(.3, -.08));
+    c.quadraticCurveTo(...P(.42, .3), ...P(.32, .36)); c.lineTo(...P(-.32, .36)); c.quadraticCurveTo(...P(-.42, .3), ...P(-.3, -.08));
+    c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(...P(-.33, .04)); c.lineTo(...P(.33, .04)); c.stroke();
+    c.fillStyle = adjust(col, 0.06); c.beginPath(); c.rect(...P(-.05, -.01), .1 * s, .09 * s); c.fill(); c.stroke();
+  },
+  chair(c, x, y, s, col) {
+    const P = (u, v) => [x + u * s, y + v * s];
+    c.beginPath(); c.rect(...P(-.2, -.44), .4 * s, .42 * s); c.fill(); c.stroke();
+    c.beginPath(); c.rect(...P(-.24, .08), .07 * s, .36 * s); c.rect(...P(.17, .08), .07 * s, .36 * s); c.fill(); c.stroke();
+    c.fillStyle = adjust(col, 0.06); c.beginPath(); c.rect(...P(-.28, -.02), .56 * s, .1 * s); c.fill(); c.stroke();
+  },
+};
+function draw(p) {
+  const c = $("canvas").getContext("2d"), W = 512;
+  c.fillStyle = p.background; c.fillRect(0, 0, W, W);
+  // Neutral outline: a darker shade of the colour itself could read as another colour
+  // (dark orange looks brown, light red looks pink). Inner details only vary slightly.
+  const outline = luminance(p.hex) < .25 ? "#9a9a9a" : "#3a3a3a";
+  const spots = p.count === 2 ? [[W * .28, W * .52, W * .42], [W * .72, W * .48, W * .42]] : [[W / 2, W / 2, W * .8]];
+  for (const [x, y, s] of spots) {
+    c.fillStyle = p.hex; c.strokeStyle = outline; c.lineWidth = W * .008; c.lineJoin = "round";
+    SHAPES[p.object](c, x, y, s, p.hex, p.background);
+  }
+}
+
+// ---- Session --------------------------------------------------------------
+const BATCH = 20;  // cards per series
+let code = "", profile = {}, prompts = [], done = new Set(), idx = 0, batch = 0;
+const batchRange = b => [b * BATCH, Math.min(prompts.length, (b + 1) * BATCH)];
+const batchDone = b => prompts.slice(...batchRange(b)).every(p => done.has(p.id));
+let stream = null, recorder = null, chunks = [], lastUrl = null, pending = null;
+
+function show(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id)); }
+function newCode() {
+  const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(6));
+  return Array.from(r, b => A[b % A.length]).join("");
+}
+function setStatus(t, cls) { $("status").textContent = t; $("status").className = cls || "muted"; }
+
+async function begin(c, prof) {
+  // In-app browsers (WhatsApp, Instagram, Facebook) often have no microphone or no MediaRecorder.
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { alert(t("no_mic")); return; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(
+      { audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 } });
+  } catch (e) {
+    alert(e.name === "NotAllowedError" || e.name === "SecurityError" ? t("no_mic") : t("mic") + " (" + e.message + ")");
+    return;
+  }
+  code = c; profile = prof || store.get("profile:" + code) || {};
+  store.set("profile:" + code, profile); store.set("lastCode", code);
+  done = new Set(store.get("done:" + code) || []);
+  prompts = promptsFor(code);
+  $("r-code").textContent = code; $("d-code").textContent = code;
+  $("b-wa").href = "https://wa.me/?text=" + encodeURIComponent(t("wa_text", { code, url: location.origin + location.pathname }));
+  const first = prompts.findIndex(p => !done.has(p.id));
+  if (first < 0) { batch = Math.ceil(prompts.length / BATCH) - 1; return finishBatch(); }
+  startBatch(Math.floor(first / BATCH));
+}
+
+// ---- Audio quality --------------------------------------------------------
+// Levels are RMS in dBFS.
+const NO_VOICE_DB = -45;
+let audioCtx = null;
+// ?debug in the URL shows the measured levels on screen, to tune the thresholds.
+const DEBUG = new URLSearchParams(location.search).has("debug");
+const dbfs = x => 20 * Math.log10(Math.max(x, 1e-9));
+const percentile = (xs, q) => { const v = [...xs].sort((a, b) => a - b); return v[Math.min(v.length - 1, Math.floor(q * v.length))]; };
+function ctx() { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+
+// Speech vs background level of one recording, from 20 ms frames.
+async function quality(blob) {
+  try {
+    const data = await blob.arrayBuffer();
+    const audio = await new Promise((ok, ko) => ctx().decodeAudioData(data, ok, ko));
+    const x = audio.getChannelData(0), n = Math.round(audio.sampleRate * .02), frames = [];
+    let clipped = 0;
+    for (let i = 0; i + n <= x.length; i += n) {
+      let e = 0;
+      for (let j = i; j < i + n; j++) { e += x[j] * x[j]; if (Math.abs(x[j]) > .99) clipped++; }
+      frames.push(dbfs(Math.sqrt(e / n)));
+    }
+    if (frames.length < 10) return null;
+    const speech = percentile(frames, .95), noise = percentile(frames, .1);
+    const q = { speech_db: Math.round(speech), noise_db: Math.round(noise), snr_db: Math.round(speech - noise),
+                clipped: +(clipped / x.length).toFixed(4) };
+    // Only an almost silent recording is flagged to the participant (reliable on every device);
+    // noise and saturation are kept in the metadata and filtered when building the datasets.
+    q.problem = speech < NO_VOICE_DB ? "q_novoice" : null;
+    return q;
+  } catch (e) { return null; }  // e.g. a format this browser cannot decode: skip the check
+}
+
+function startBatch(b) {
+  batch = b;
+  const [lo, hi] = batchRange(b), first = prompts.slice(lo, hi).findIndex(p => !done.has(p.id));
+  idx = lo + Math.max(0, first);
+  show("s-record"); render();
+}
+
+function finishBatch() {
+  const more = prompts.findIndex(p => !done.has(p.id)) >= 0;
+  $("d-text").textContent = t("done_text", { n: done.size }) + t(more ? "done_more" : "done_all");
+  $("b-more").style.display = more ? "" : "none";
+  show("s-done");
+}
+
+function render() {
+  const p = prompts[idx];
+  draw(p);
+  $("phrase").className = "phrase ar"; $("phrase").textContent = QUESTIONS[p.template][0];
+  $("phrase").insertAdjacentHTML("beforeend", `<div class="hint">${t(QUESTIONS[p.template][1])}</div>`);
+  const [lo, hi] = batchRange(batch), inBatch = prompts.slice(lo, hi).filter(q => done.has(q.id)).length;
+  $("r-count").textContent = t("count", { b: batch + 1, i: idx - lo + 1, n: hi - lo, k: inBatch });
+  $("r-bar").style.width = (100 * inBatch / (hi - lo)) + "%";
+  $("b-prev").disabled = idx === lo; $("b-next").disabled = idx === hi - 1;
+  $("b-play").disabled = true; $("b-retry").style.display = "none";
+  setStatus(done.has(p.id) ? t("already") : "", done.has(p.id) ? "ok" : "");
+}
+
+function mimeType() {
+  for (const m of ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"])
+    if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+  return "";
+}
+
+function setBusy(busy) {  // no new recording while a clip is being sent
+  $("rec").disabled = busy;
+  $("rec").textContent = busy ? t("sending") : t("rec");
+}
+
+function toggleRecord() {
+  if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+  if ($("rec").disabled) return;
+  chunks = [];
+  const mime = mimeType();
+  recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+  recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+  recorder.onstop = finish;
+  recorder.start();
+  $("rec").textContent = t("stop"); $("rec").className = "recording";
+  setStatus(t("recording"), "err");
+}
+
+const toBase64 = blob => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result.split(",")[1]); f.readAsDataURL(blob); });
+
+async function finish() {
+  $("rec").className = "primary"; setBusy(true);
+  const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+  if (lastUrl) URL.revokeObjectURL(lastUrl);
+  lastUrl = URL.createObjectURL(blob); $("b-play").disabled = false;
+  const p = prompts[idx], q = await quality(blob);
+  pending = {
+    speaker: code, id: p.id, mime: blob.type, audio: await toBase64(blob),
+    image: $("canvas").toDataURL("image/png").split(",")[1],
+    meta: { ...p, profile, quality: q, userAgent: navigator.userAgent, recorded: new Date().toISOString() },
+  };
+  send(idx);
+}
+
+async function send(at) {
+  setStatus(t("sending"));
+  $("b-retry").style.display = "none";
+  try {
+    if (!UPLOAD_URL) throw new Error(t("not_configured"));
+    const res = await fetch(UPLOAD_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(pending) });
+    const out = await res.json();
+    if (!out.ok) throw new Error(out.error || t("refused"));
+  } catch (e) {
+    setStatus(t("fail", { e: e.message }), "err");
+    $("b-retry").style.display = "";
+    setBusy(false);
+    return;
+  }
+  const problem = pending.meta.quality && pending.meta.quality.problem;
+  const debugLine = !DEBUG ? "" : " · debug: " + (pending.meta.quality ? JSON.stringify(pending.meta.quality) : "no measurement (decode failed)");
+  done.add(pending.id); store.set("done:" + code, [...done]); pending = null;
+  if (problem) {  // stay on this card so it can be redone
+    setStatus(t(problem) + debugLine, "err"); setBusy(false);
+    if (batchDone(batch)) {  // last card of the series: allow finishing anyway
+      $("status").insertAdjacentHTML("beforeend", ` <button id="b-finish">${t("continue")}</button>`);
+      $("b-finish").onclick = finishBatch;
+    }
+    return;
+  }
+  if (batchDone(batch)) { setBusy(false); finishBatch(); return; }
+  setStatus(t("saved") + debugLine, "ok");
+  if (at !== idx || DEBUG) { setBusy(false); return; }
+  setTimeout(() => {  // stay disabled until the next card is shown
+    if (at === idx) {
+      const [lo, hi] = batchRange(batch), later = (q, i) => i > idx && i < hi && !done.has(q.id);
+      const next = prompts.findIndex(later), anyLeft = prompts.findIndex((q, i) => i >= lo && i < hi && !done.has(q.id));
+      idx = next >= 0 ? next : anyLeft >= 0 ? anyLeft : idx; render();
+    }
+    setBusy(false);
+  }, 700);
+}
+
+// ---- Wiring ---------------------------------------------------------------
+$("swatches").innerHTML = Object.keys(COLORS).map(c => SHADES[c].map(([a, b]) => (a + b) / 2)).map(([h, sat, l]) => `<span style="background:${hslHex((h + 360) % 360, sat, l)}"></span>`).join("");
+$("b-lang").onclick = () => { lang = lang === "ar" ? "fr" : "ar"; store.set("lang", lang); applyLang(); };
+applyLang();
+const consentOk = () => { $("b-consent").disabled = !($("c-age").checked && $("c-ok").checked); };
+$("c-age").onchange = consentOk; $("c-ok").onchange = consentOk;
+$("b-consent").onclick = () => show("s-profile");
+$("b-ret-continue").onclick = () => begin(store.get("lastCode"));
+$("b-ret-new").onclick = () => { $("ret-known").style.display = "none"; $("ret-code").style.display = "none"; };
+$("b-copy").onclick = async () => {
+  try { await navigator.clipboard.writeText(code); $("b-copy").textContent = t("copied"); } catch (e) { prompt(t("copy_code"), code); }
+};
+$("b-other").onclick = () => {  // hand the device to someone else: new person, new code
+  code = ""; done = new Set(); prompts = [];
+  $("c-age").checked = $("c-ok").checked = false; consentOk();
+  ["p-age", "p-gender", "p-region", "p-vision", "p-code"].forEach(id => $(id).value = "");
+  $("ret-known").style.display = "none"; $("ret-code").style.display = "none";
+  show("s-consent"); window.scrollTo(0, 0);
+};
+$("b-start").onclick = () => begin(newCode(), { age: $("p-age").value, gender: $("p-gender").value, region: $("p-region").value.trim(),
+                                               colour_vision: $("p-vision").value });  // optional; colour-blind answers analysed apart
+$("b-resume").onclick = () => {
+  const c = $("p-code").value.trim().toUpperCase();
+  if (!/^[A-Z0-9]{6}$/.test(c)) return alert(t("bad_code"));
+  begin(c);
+};
+$("rec").onclick = toggleRecord;
+$("b-play").onclick = () => new Audio(lastUrl).play();
+$("b-retry").onclick = () => { if (pending) { setBusy(true); send(idx); } };
+$("b-prev").onclick = () => { if (idx > batchRange(batch)[0]) { idx--; render(); } };
+$("b-next").onclick = () => { if (idx < batchRange(batch)[1] - 1) { idx++; render(); } };
+$("b-review").onclick = () => { idx = batchRange(batch)[0]; show("s-record"); render(); };
+$("b-more").onclick = () => startBatch(Math.floor(prompts.findIndex(p => !done.has(p.id)) / BATCH));
+document.addEventListener("keydown", e => {
+  if (!$("s-record").classList.contains("active") || e.target.tagName === "INPUT") return;
+  if (e.code === "Space") { e.preventDefault(); toggleRecord(); }
+  else if (e.key === (lang === "ar" ? "ArrowLeft" : "ArrowRight")) $("b-next").click();
+  else if (e.key === (lang === "ar" ? "ArrowRight" : "ArrowLeft")) $("b-prev").click();
+});
+</script>
+</body>
+</html>
