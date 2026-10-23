@@ -171,6 +171,7 @@ const TEXTS = {
     about_p2: "غادي تشوف <b>20 تصويرة</b> ديال حوايج ملونين، وكل وحدة معاها سؤال صغير: جاوب عليه بصوت عالي، بالدارجة وبالكلمات ديالك. كتاخد <b>شي 3 دقايق</b>. ومن بعد، إلا بغيتي، تقدر تزيد 20 أخرين.",
     quiet: "⚠️ سجّل فبلاصة هادية: بلا تلفازة، بلا موسيقى، وبلا شي حد كيهضر حداك.",
     quiet_short: "🔇 سجّل فبلاصة هادية",
+    empty_rec: "⚠️ ما تسجل والو. عاود سجّل هاد البطاقة.",
     ret_h: "مرحبا بيك من جديد!", ret_continue: "كمّل بالكود ديالك {code}", ret_new: "شخص آخر؟ بدا بكود جديد",
     copy_code: "نسخ الكود", copied: "تنسخ ✓", wa_code: "صيفطو ليك فواتساب", other_person: "شخص آخر بغا يسجل؟",
     wa_text: "الكود ديالي ف ألوان بالدارجة: {code}\n{url}",
@@ -222,6 +223,7 @@ const TEXTS = {
     about_p2: "Vous verrez <b>20 images</b> d'objets colorés, chacune avec une petite question : répondez à voix haute, en darija, avec vos propres mots. Cela prend <b>environ 3 minutes</b>. Ensuite, si vous en avez envie, vous pourrez faire 20 cartes de plus.",
     quiet: "⚠️ Enregistrez dans un endroit calme : sans télévision, sans musique, sans personne qui parle autour de vous.",
     quiet_short: "🔇 Enregistrez dans un endroit calme",
+    empty_rec: "⚠️ Rien n'a été enregistré. Recommencez cette carte.",
     ret_h: "Bon retour !", ret_continue: "Continuer avec votre code {code}", ret_new: "Une autre personne ? Commencer avec un nouveau code",
     copy_code: "Copier le code", copied: "Copié ✓", wa_code: "Me l'envoyer sur WhatsApp", other_person: "Une autre personne veut enregistrer ?",
     wa_text: "Mon code Alwan bdarija : {code}\n{url}",
@@ -677,7 +679,10 @@ function render() {
 }
 
 function mimeType() {
-  for (const m of ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"])
+  // Safari (iPhone, Mac) can record webm but sometimes returns empty files: use its native mp4 there.
+  const safari = /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Safari\//.test(navigator.userAgent) && !/Chrome|Chromium|Android/.test(navigator.userAgent));
+  const order = safari ? ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"] : ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+  for (const m of order)
     if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
   return "";
 }
@@ -705,6 +710,9 @@ const toBase64 = blob => new Promise(r => { const f = new FileReader(); f.onload
 async function finish() {
   $("rec").className = "primary"; setBusy(true);
   const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+  if (blob.size < 1000) {  // nothing was captured (seen on some iPhones): do not send, ask to redo the card
+    setBusy(false); $("b-play").disabled = true; setStatus(t("empty_rec"), "err"); return;
+  }
   if (lastUrl) URL.revokeObjectURL(lastUrl);
   lastUrl = URL.createObjectURL(blob); $("b-play").disabled = false;
   const p = prompts[idx], q = await quality(blob);
