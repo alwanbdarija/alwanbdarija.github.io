@@ -620,7 +620,7 @@ async function begin(c, prof) {
 
 // ---- Audio quality --------------------------------------------------------
 // Levels are RMS in dBFS.
-const NO_VOICE_DB = -45;
+const NO_VOICE_SNR_DB = 10;  // voice must rise this much above the background
 let audioCtx = null;
 // ?debug in the URL shows the measured levels on screen, to tune the thresholds.
 const DEBUG = new URLSearchParams(location.search).has("debug");
@@ -644,9 +644,10 @@ async function quality(blob) {
     const speech = percentile(frames, .95), noise = percentile(frames, .1);
     const q = { speech_db: Math.round(speech), noise_db: Math.round(noise), snr_db: Math.round(speech - noise),
                 clipped: +(clipped / x.length).toFixed(4) };
-    // Only an almost silent recording is flagged to the participant (reliable on every device);
-    // noise and saturation are kept in the metadata and filtered when building the datasets.
-    q.problem = speech < NO_VOICE_DB ? "q_novoice" : null;
+    // Only a recording where nothing rises above the background is flagged to the participant. The absolute
+    // level is not used: some phones record speech 30 dB lower with an excellent speech/noise ratio.
+    // Noise, low level and saturation are kept in the metadata and handled when building the datasets.
+    q.problem = q.snr_db < NO_VOICE_SNR_DB ? "q_novoice" : null;
     return q;
   } catch (e) { return null; }  // e.g. a format this browser cannot decode: skip the check
 }
