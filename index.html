@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alwan bdarija</title>
 <meta name="description" content="Alwan bdarija : prêtez votre voix en darija à un projet de recherche.">
+<!-- Link preview (WhatsApp, Facebook, Messenger…) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alwanbdarija.github.io/">
+<meta property="og:title" content="ألوان بالدارجة · Alwan bdarija">
+<meta property="og:description" content="عطينا صوتك فـ 3 دقايق، وعاون البحث على الدارجة 🇲🇦 بلا سمية، من التيليفون.">
+<meta property="og:image" content="https://alwanbdarija.github.io/docs/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ar_MA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2f4bd1">
 <style>
   /* Light theme for everyone: a warm page, Majorelle-blue actions, neutral grey around the drawings. */
   :root { color-scheme: light; --bg: #faf5ec; --fg: #2b2622; --muted: #6f665c; --line: #e8dfd0; --card: #ffffff;
@@ -21,6 +32,19 @@
   .lang { padding: 5px 10px; font-size: .85rem; flex: none; background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.45); }
   .swatches { display: flex; height: 12px; margin: 0 -16px; }
   .swatches span { flex: 1; }
+  .landing { text-align: center; padding: 18px 4px 6px; }
+  .land-objects { display: flex; justify-content: center; gap: 2px; margin: 4px 0 6px; }
+  .land-objects canvas { width: min(48px, 13vw); height: min(48px, 13vw); border-radius: 0; animation: bob 3s ease-in-out infinite; }
+  .land-objects canvas:nth-child(2n) { animation-delay: -1.5s; }
+  @keyframes bob { 50% { transform: translateY(-5px); } }
+  @media (prefers-reduced-motion: reduce) { .land-objects canvas { animation: none; } }
+  .land-tag { font-size: 1.3rem; font-weight: 700; line-height: 1.5; margin: 6px 0 12px; }
+  .land-feats { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .land-feats span { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: .92rem; }
+  .land-cta { font-size: 1.2rem; padding: 14px 44px; border-radius: 999px; box-shadow: 0 6px 18px rgba(47, 75, 209, .3); }
+  .how { list-style: none; padding: 0; margin: 8px auto 4px; max-width: 420px; text-align: start; }
+  .how li { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+  .how-n { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
   .stage { background: var(--stage); border-radius: 12px; padding: 12px; }
   html[dir=rtl] body { font-family: "Noto Naskh Arabic", "Amiri", "Geeza Pro", system-ui, sans-serif; }
   h2 { font-size: 1.05rem; margin: 18px 0 6px; }
@@ -66,6 +90,19 @@
 
   <!-- 1. Information and consent -->
   <section class="screen active" id="s-consent">
+    <!-- Landing: what it is in one glance, then the consent below (the button scrolls to it). -->
+    <div class="landing">
+      <div class="land-objects" id="land-objects" aria-hidden="true"></div>
+      <p class="land-tag" data-t="land_tag"></p>
+      <div class="land-feats"><span data-t="land_f1"></span><span data-t="land_f2"></span><span data-t="land_f3"></span></div>
+      <button class="primary land-cta" id="b-land" data-t="land_cta"></button>
+      <h2 data-t="how_h"></h2>
+      <ol class="how">
+        <li><span class="how-n">1</span><span data-t="how_1"></span></li>
+        <li><span class="how-n">2</span><span data-t="how_2"></span></li>
+        <li><span class="how-n">3</span><span data-t="how_3"></span></li>
+      </ol>
+    </div>
     <!-- Returning participants: continue with the code remembered on this device, or enter one.
          One code = one person: someone else on the same device starts with a new code. -->
     <div class="card" id="ret-known" style="display:none">
@@ -78,7 +115,7 @@
       <div class="controls"><input type="text" id="p-code" maxlength="12" data-t-placeholder="code_ph" style="max-width:220px">
         <button id="b-resume" data-t="resume"></button></div>
     </div>
-    <div class="card">
+    <div class="card" id="consent-card">
       <h2 data-t="about_h"></h2>
       <p data-t="about_p1"></p>
       <p data-t="about_p2"></p>
@@ -179,6 +216,9 @@ const TEXTS = {
     about_p2: "غادي تشوف <b>20 تصويرة</b> ديال حوايج ملونين، وكل وحدة معاها سؤال صغير: جاوب عليه بصوت عالي، بالدارجة وبالكلمات ديالك. كتاخد <b>شي 3 دقايق</b>. ومن بعد، إلا بغيتي، تقدر تزيد 20 أخرين.",
     quiet: "⚠️ سجّل فبلاصة هادية: بلا تلفازة، بلا موسيقى، وبلا شي حد كيهضر حداك.",
     quiet_short: "🔇 سجّل فبلاصة هادية",
+    land_tag: "عطينا صوتك فـ 3 دقايق، وعاون البحث على الدارجة 🇲🇦", land_cta: "بدا دابا",
+    land_f1: "⏱️ شي 3 دقايق", land_f2: "🔒 بلا سمية بلا إيميل", land_f3: "📱 من التيليفون",
+    how_h: "كيفاش؟", how_1: "كتشوف تصويرة ديال شي حاجة ملونة", how_2: "كتجاوب بصوتك بالدارجة، بالكلمات ديالك", how_3: "صوتك كيعاون البحث على الدارجة",
     too_long: "⚠️ التسجيل طويل بزاف. عاود سجّل وجاوب فشي ثواني.", mic_error: "⚠️ الميكرو ما خدامش دابا. عاود ورك على «سجّل».",
     fail_short: "ما تصيفطاتش. شوف الكونيكسيون، ومن بعد ورك على «عاود صيفط».", back_done: "رجع للنهاية ديال السلسلة",
     prev_label: "البطاقة اللي قبل", next_label: "البطاقة اللي من بعد",
@@ -238,6 +278,9 @@ const TEXTS = {
     about_p2: "Vous verrez <b>20 images</b> d'objets colorés, chacune avec une petite question : répondez à voix haute, en darija, avec vos propres mots. Cela prend <b>environ 3 minutes</b>. Ensuite, si vous en avez envie, vous pourrez faire 20 cartes de plus.",
     quiet: "⚠️ Enregistrez dans un endroit calme : sans télévision, sans musique, sans personne qui parle autour de vous.",
     quiet_short: "🔇 Enregistrez dans un endroit calme",
+    land_tag: "Prêtez votre voix 3 minutes à la recherche sur la darija 🇲🇦", land_cta: "Commencer",
+    land_f1: "⏱️ environ 3 minutes", land_f2: "🔒 anonyme", land_f3: "📱 sur téléphone",
+    how_h: "Comment ça marche ?", how_1: "Vous voyez un objet coloré", how_2: "Vous répondez à voix haute, en darija, avec vos mots", how_3: "Votre voix aide la recherche sur la darija",
     too_long: "⚠️ L'enregistrement est trop long. Recommencez en répondant en quelques secondes.", mic_error: "⚠️ Le micro ne répond plus. Appuyez de nouveau sur « Enregistrer ».",
     fail_short: "Échec de l'envoi. Vérifiez la connexion puis « Renvoyer ».", back_done: "Retour à la fin de la série",
     prev_label: "Carte précédente", next_label: "Carte suivante",
@@ -617,8 +660,8 @@ const SHAPES = {
     c.fillStyle = adjust(col, 0.06); c.beginPath(); c.rect(...P(-.28, -.02), .56 * s, .1 * s); c.fill(); c.stroke();
   },
 };
-function draw(p) {
-  const c = $("canvas").getContext("2d"), W = 512;
+function draw(p, canvas) {
+  const c = (canvas || $("canvas")).getContext("2d"), W = 512;
   c.fillStyle = p.background; c.fillRect(0, 0, W, W);
   // Neutral outline: a darker shade of the colour itself could read as another colour
   // (dark orange looks brown, light red looks pink). Inner details only vary slightly.
@@ -865,6 +908,14 @@ async function send(at) {
 
 // ---- Wiring ---------------------------------------------------------------
 $("swatches").innerHTML = Object.keys(COLORS).map(c => SHADES[c].map(([a, b]) => (a + b) / 2)).map(([h, sat, l]) => `<span style="background:${hslHex((h + 360) % 360, sat, l)}"></span>`).join("");
+// Landing illustration: a few objects in different colours, drawn by the same code as the cards.
+[["ball", "red"], ["plane", "blue"], ["cup", "yellow"], ["car", "green"], ["umbrella", "purple"], ["star", "orange"], ["phone", "pink"]]
+  .forEach(([o, c]) => {
+    const cv = document.createElement("canvas"); cv.width = cv.height = 512; $("land-objects").appendChild(cv);
+    const [h, sat, l] = SHADES[c].map(([a, b]) => (a + b) / 2);
+    draw({ object: o, hex: hslHex((h + 360) % 360, sat, l), background: "rgba(0,0,0,0)", count: 1 }, cv);
+  });
+$("b-land").onclick = () => $("consent-card").scrollIntoView({ behavior: "smooth", block: "start" });
 $("b-lang").onclick = () => { lang = lang === "ar" ? "fr" : "ar"; store.set("lang", lang); applyLang(); };
 applyLang();
 const consentOk = () => { $("b-consent").disabled = !($("c-age").checked && $("c-ok").checked); };
