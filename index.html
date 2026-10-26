@@ -217,7 +217,7 @@ const TEXTS = {
         + "<li>«وصف التصويرة»: هضر على التصويرة بالدارجة كيف بغيتي، جملة ولا جوج.</li>"
         + "<li>فالبيسي: <kbd>Espace</kbd> باش تسجل وتوقف، والفليشات باش تدوز.</li>",
     hint_colour: "قول سمية هاد اللون بالكلمة اللي كتستعمل عادة", hint_object: "قول سمية هاد الحاجة بالكلمة اللي كتستعمل عادة",
-    hint_both: "قول شنو هي هاد الحاجة واللون ديالها، بالكلمات ديالك", hint_plural: "قول شنو كتشوف فهاد التصويرة، بالكلمات ديالك",
+    hint_both: "قول شنو هي هاد الحاجة واللون ديالها، بالكلمات ديالك", hint_plural: "شوف مزيان: قول شحال كاين وشنو هوما، بالكلمات ديالك",
     free: "هضر على هاد التصويرة بالدارجة كيف بغيتي، جملة ولا جوج",
     already: "مسجلة ✓ (تقدر تعاودها)", recording: "كنسجلو… هضر، ومن بعد ورك على «وقّف».",
     saved: "تسجلات ✓", fail: "ما تصيفطاتش ({e}). شوف الكونيكسيون، ومن بعد ورك على «عاود صيفط».",
@@ -273,7 +273,7 @@ const TEXTS = {
         + "<li>« Décrivez l'image » : parlez librement de l'image en darija, en une ou deux phrases.</li>"
         + "<li>Sur ordinateur : <kbd>Espace</kbd> pour enregistrer et arrêter, les flèches pour naviguer.</li>",
     hint_colour: "Dites le nom de cette couleur, avec le mot que vous utilisez d'habitude", hint_object: "Dites le nom de cet objet, avec le mot que vous utilisez d'habitude",
-    hint_both: "Dites ce que c'est et de quelle couleur, avec vos mots", hint_plural: "Dites ce que vous voyez sur l'image, avec vos mots",
+    hint_both: "Dites ce que c'est et de quelle couleur, avec vos mots", hint_plural: "Regardez bien : dites combien il y en a et ce que c'est, avec vos mots",
     free: "Décrivez l'image librement en darija, en 1 ou 2 phrases",
     already: "Déjà enregistrée ✓ (vous pouvez la refaire)", recording: "Enregistrement… parlez, puis appuyez sur Arrêter.",
     saved: "Enregistré ✓", fail: "Échec de l'envoi ({e}). Vérifiez la connexion puis « Renvoyer ».",
@@ -338,12 +338,13 @@ const QUESTIONS = {
   question: ["شنو هاد اللون؟", "hint_colour"],
   object_question: ["شنو هادشي؟", "hint_object"],
   both_question: ["شنو هادشي، وشنو اللون ديالو؟", "hint_both"],
-  plural_question: ["شنو كتشوف؟", "hint_plural"],  // two objects drawn: invites plural forms
+  // Two objects drawn. Asking "how many" makes people notice there are two (some answered as for one object).
+  plural_question: ["شحال من وحدة كاينة، وشنو هوما؟", "hint_plural"],
   free: ["وصف هاد التصويرة", "free"],
 };
 const SERIES = { question: 4, object_question: 4, both_question: 7, plural_question: 3, free: 2 };  // 20 cards
 const N_SERIES = 5;
-const VERSION = "v14-background";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
+const VERSION = "v15-plural";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
 // Colour-object pairs reserved for the generalisation test: recorded like the others but never
 // used for training (each colour and object is still trained in other pairs). Fixed before collection.
 const HELD_OUT = ["red_chair", "blue_phone", "green_umbrella", "yellow_shoe", "black_cap", "white_car",
@@ -602,7 +603,8 @@ function draw(p) {
   // Neutral outline: a darker shade of the colour itself could read as another colour
   // (dark orange looks brown, light red looks pink). Inner details only vary slightly.
   const outline = luminance(p.hex) < .25 ? "#9a9a9a" : "#3a3a3a";
-  const spots = p.count === 2 ? [[W * .28, W * .52, W * .42], [W * .72, W * .48, W * .42]] : [[W / 2, W / 2, W * .8]];
+  // Two objects: wide apart and at different heights, so they read as two things, not one pattern.
+  const spots = p.count === 2 ? [[W * .25, W * .38, W * .4], [W * .75, W * .64, W * .4]] : [[W / 2, W / 2, W * .8]];
   for (const [x, y, s] of spots) {
     c.fillStyle = p.hex; c.strokeStyle = outline; c.lineWidth = W * .008; c.lineJoin = "round";
     SHAPES[p.object](c, x, y, s, p.hex, p.background);

@@ -6,7 +6,7 @@ for a research project.
 Each participant answers series of 20 cards (up to 5 series). Every card shows a drawn object in a
 random shade of a colour and asks a question in Darija; no words are given, so answers are spontaneous:
 "شنو هاد اللون؟" (4 per series), "شنو هادشي؟" (4), "شنو هادشي، وشنو اللون ديالو؟" (7),
-"شنو كتشوف؟" with two objects (3) and a free description (2). Every series shows all 11 colours and
+"شحال من وحدة كاينة، وشنو هوما؟" with two identical objects, drawn apart (3) and a free description (2). Every series shows all 11 colours and
 all 16 objects (see below) in random pairs, so the shape never predicts the colour. The image shown and the
 card's colour, object and question are saved with each recording, together with simple audio
 level measures used to filter noisy recordings.
