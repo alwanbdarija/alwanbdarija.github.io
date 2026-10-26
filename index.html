@@ -75,7 +75,7 @@
     <div class="card" id="ret-code">
       <h2 data-t="code_h"></h2>
       <div class="muted" data-t="code_p"></div>
-      <div class="controls"><input type="text" id="p-code" maxlength="12" placeholder="K7Q2M9" style="max-width:180px">
+      <div class="controls"><input type="text" id="p-code" maxlength="12" data-t-placeholder="code_ph" style="max-width:220px">
         <button id="b-resume" data-t="resume"></button></div>
     </div>
     <div class="card">
@@ -146,6 +146,14 @@
       <div class="controls"><button class="primary" id="b-more" data-t="more"></button><button id="b-review" data-t="review"></button></div>
       <div class="controls"><button id="b-other" data-t="other_person"></button></div>
     </div>
+    <!-- Invite others: native share sheet on phones, WhatsApp, or copy the link with an invitation text. -->
+    <div class="card" style="text-align:center">
+      <h2 data-t="share_h"></h2>
+      <p data-t="share_p"></p>
+      <div class="controls"><button class="primary" id="b-share" data-t="share_btn" style="display:none"></button>
+        <a class="button" id="b-share-wa" target="_blank" rel="noopener" data-t="share_wa"></a>
+        <button id="b-share-copy" data-t="share_copy"></button></div>
+    </div>
   </section>
 </main>
 
@@ -171,6 +179,10 @@ const TEXTS = {
     about_p2: "غادي تشوف <b>20 تصويرة</b> ديال حوايج ملونين، وكل وحدة معاها سؤال صغير: جاوب عليه بصوت عالي، بالدارجة وبالكلمات ديالك. كتاخد <b>شي 3 دقايق</b>. ومن بعد، إلا بغيتي، تقدر تزيد 20 أخرين.",
     quiet: "⚠️ سجّل فبلاصة هادية: بلا تلفازة، بلا موسيقى، وبلا شي حد كيهضر حداك.",
     quiet_short: "🔇 سجّل فبلاصة هادية",
+    code_ph: "الكود ديالك (6 حروف)", code_example: "⚠️ هاد الكود كان غير مثال. إلا ما عندكش كود، بدا من الموافقة لتحت.",
+    share_h: "شارك المشروع 💬", share_p: "كل صوت جديد كيعاون بزاف. صيفط الرابط لعائلتك وصحابك!",
+    share_btn: "شارك", share_wa: "صيفط فواتساب", share_copy: "نسخ الرابط", link_copied: "تنسخ الرابط ✓",
+    invite: "سلام! كنشارك فمشروع ديال البحث على الدارجة 🇲🇦: كتشوف تصاور ديال حوايج ملونين وكتقول بصوتك وبالدارجة شنو كتشوف. كياخد شي 3 دقايق، بلا سمية وبلا إيميل. غير ديرو فبلاصة هادية 🙏",
     empty_rec: "⚠️ ما تسجل والو. عاود سجّل هاد البطاقة.",
     ret_h: "مرحبا بيك من جديد!", ret_continue: "كمّل بالكود ديالك {code}", ret_new: "شخص آخر؟ بدا بكود جديد",
     copy_code: "نسخ الكود", copied: "تنسخ ✓", wa_code: "صيفطو ليك فواتساب", other_person: "شخص آخر بغا يسجل؟",
@@ -223,6 +235,10 @@ const TEXTS = {
     about_p2: "Vous verrez <b>20 images</b> d'objets colorés, chacune avec une petite question : répondez à voix haute, en darija, avec vos propres mots. Cela prend <b>environ 3 minutes</b>. Ensuite, si vous en avez envie, vous pourrez faire 20 cartes de plus.",
     quiet: "⚠️ Enregistrez dans un endroit calme : sans télévision, sans musique, sans personne qui parle autour de vous.",
     quiet_short: "🔇 Enregistrez dans un endroit calme",
+    code_ph: "Votre code (6 caractères)", code_example: "⚠️ Ce code n'était qu'un exemple. Si vous n'avez pas de code, commencez par le consentement ci-dessous.",
+    share_h: "Partager le projet 💬", share_p: "Chaque nouvelle voix compte beaucoup. Envoyez le lien à votre famille et à vos amis !",
+    share_btn: "Partager", share_wa: "Envoyer sur WhatsApp", share_copy: "Copier le lien", link_copied: "Lien copié ✓",
+    invite: "Bonjour ! Je participe à un projet de recherche sur la darija 🇲🇦 : on voit des images d'objets colorés et on dit, à voix haute et en darija, ce qu'on voit. Environ 3 minutes, anonyme. Mettez-vous dans un endroit calme 🙏",
     empty_rec: "⚠️ Rien n'a été enregistré. Recommencez cette carte.",
     ret_h: "Bon retour !", ret_continue: "Continuer avec votre code {code}", ret_new: "Une autre personne ? Commencer avec un nouveau code",
     copy_code: "Copier le code", copied: "Copié ✓", wa_code: "Me l'envoyer sur WhatsApp", other_person: "Une autre personne veut enregistrer ?",
@@ -287,6 +303,7 @@ function applyLang() {
   if ($("s-done").classList.contains("active")) finishBatch();
   renderReturning();
   $("b-wa").href = "https://wa.me/?text=" + encodeURIComponent(t("wa_text", { code: code || "", url: location.origin + location.pathname }));
+  $("b-share-wa").href = "https://wa.me/?text=" + encodeURIComponent(t("invite") + "\n" + location.origin + location.pathname);
 }
 function renderReturning() {
   const last = store.get("lastCode");
@@ -778,14 +795,23 @@ $("b-lang").onclick = () => { lang = lang === "ar" ? "fr" : "ar"; store.set("lan
 applyLang();
 const consentOk = () => { $("b-consent").disabled = !($("c-age").checked && $("c-ok").checked); };
 $("c-age").onchange = consentOk; $("c-ok").onchange = consentOk;
-$("b-consent").onclick = () => show("s-profile");
+// Resuming with a typed code still goes through the consent (someone new could type a code they were given).
+let resumeCode = "";
+$("b-consent").onclick = () => resumeCode ? begin(resumeCode) : show("s-profile");
+const siteUrl = () => location.origin + location.pathname;
+if (navigator.share) $("b-share").style.display = "";
+$("b-share").onclick = () => navigator.share({ title: "Alwan bdarija", text: t("invite"), url: siteUrl() }).catch(() => {});
+$("b-share-copy").onclick = async () => {
+  const text = t("invite") + "\n" + siteUrl();
+  try { await navigator.clipboard.writeText(text); $("b-share-copy").textContent = t("link_copied"); } catch (e) { prompt(t("share_copy"), text); }
+};
 $("b-ret-continue").onclick = () => begin(store.get("lastCode"));
 $("b-ret-new").onclick = () => { $("ret-known").style.display = "none"; $("ret-code").style.display = "none"; };
 $("b-copy").onclick = async () => {
   try { await navigator.clipboard.writeText(code); $("b-copy").textContent = t("copied"); } catch (e) { prompt(t("copy_code"), code); }
 };
 $("b-other").onclick = () => {  // hand the device to someone else: new person, new code
-  code = ""; done = new Set(); prompts = [];
+  code = ""; done = new Set(); prompts = []; resumeCode = "";
   $("c-age").checked = $("c-ok").checked = false; consentOk();
   ["p-age", "p-gender", "p-region", "p-vision", "p-code"].forEach(id => $(id).value = "");
   $("ret-known").style.display = "none"; $("ret-code").style.display = "none";
@@ -796,7 +822,10 @@ $("b-start").onclick = () => begin(newCode(), { age: $("p-age").value, gender: $
 $("b-resume").onclick = () => {
   const c = $("p-code").value.trim().toUpperCase();
   if (!/^[A-Z0-9]{6}$/.test(c)) return alert(t("bad_code"));
-  begin(c);
+  if (c === "K7Q2M9") return alert(t("code_example"));  // the example once shown in this field
+  resumeCode = c;
+  $("ret-code").style.display = "none";
+  $("c-age").scrollIntoView({ behavior: "smooth", block: "center" });
 };
 $("rec").onclick = toggleRecord;
 $("b-play").onclick = () => new Audio(lastUrl).play();
