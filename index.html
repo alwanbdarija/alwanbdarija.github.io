@@ -127,7 +127,7 @@
         <button id="b-next"></button>
       </div>
       <div class="controls"><button id="b-play" disabled data-t="play"></button><button id="b-retry" style="display:none" data-t="retry"></button></div>
-      <div id="status" class="muted"></div>
+      <div id="status" class="muted" aria-live="polite"></div>
     </div>
     <details class="card">
       <summary data-t="tips_h"></summary>
@@ -179,6 +179,9 @@ const TEXTS = {
     about_p2: "غادي تشوف <b>20 تصويرة</b> ديال حوايج ملونين، وكل وحدة معاها سؤال صغير: جاوب عليه بصوت عالي، بالدارجة وبالكلمات ديالك. كتاخد <b>شي 3 دقايق</b>. ومن بعد، إلا بغيتي، تقدر تزيد 20 أخرين.",
     quiet: "⚠️ سجّل فبلاصة هادية: بلا تلفازة، بلا موسيقى، وبلا شي حد كيهضر حداك.",
     quiet_short: "🔇 سجّل فبلاصة هادية",
+    too_long: "⚠️ التسجيل طويل بزاف. عاود سجّل وجاوب فشي ثواني.", mic_error: "⚠️ الميكرو ما خدامش دابا. عاود ورك على «سجّل».",
+    fail_short: "ما تصيفطاتش. شوف الكونيكسيون، ومن بعد ورك على «عاود صيفط».", back_done: "رجع للنهاية ديال السلسلة",
+    prev_label: "البطاقة اللي قبل", next_label: "البطاقة اللي من بعد",
     code_ph: "الكود ديالك (6 حروف)", code_example: "⚠️ هاد الكود كان غير مثال. إلا ما عندكش كود، بدا من الموافقة لتحت.",
     share_h: "شارك المشروع 💬", share_p: "كل صوت جديد كيعاون بزاف. صيفط الرابط لعائلتك وصحابك!",
     share_btn: "شارك", share_wa: "صيفط فواتساب", share_copy: "نسخ الرابط", link_copied: "تنسخ الرابط ✓",
@@ -192,7 +195,7 @@ const TEXTS = {
     q_novoice: "⚠️ ما سمعناش صوتك. قرّب من الميكرو، شوف واش خدام، وعاود سجّل.",
     q_loud: "⚠️ الصوت عالي بزاف وكيتقطع. بعّد شوية من الميكرو وعاود سجّل.",
     data_h: "المعطيات ديالك",
-    data_what: "<b>شنو كنجمعو:</b> التسجيلات ديال صوتك، التصاور اللي بانو ليك، وإلا بغيتي: شحال فعمرك تقريبا، واش راجل ولا مرا، المنطقة ديالك، وواش كتخلط بين شي ألوان. ما كنطلبوش السمية ولا الإيميل.",
+    data_what: "<b>شنو كنجمعو:</b> التسجيلات ديال صوتك، التصاور اللي بانو ليك، وإلا بغيتي: شحال فعمرك تقريبا، واش راجل ولا مرا، المنطقة ديالك، وواش كتخلط بين شي ألوان. كنسجلو حتى نوع الجهاز والوقت ديال التسجيل. ما كنطلبوش السمية ولا الإيميل.",
     data_use: "<b>فاش غادي يتستعملو:</b> باش نعلّمو ونجربو برامج ديال البحث، وننشرو نتائج بالأرقام. التسجيلات كتبقى محفوظة بشكل خاص، وما غاديش يتنشرو كيف ما هوما بلا ما نطلبو منك الموافقة من جديد.",
     data_withdraw: "<b>إلا بدلتي رأيك:</b> كتاخد كود ديال المشارك. صيفطو ل {contact} ونمسحو التسجيلات ديالك.",
     data_age: "خاصك تكون <b>عندك 18 عام ولا كثر</b>.",
@@ -235,6 +238,9 @@ const TEXTS = {
     about_p2: "Vous verrez <b>20 images</b> d'objets colorés, chacune avec une petite question : répondez à voix haute, en darija, avec vos propres mots. Cela prend <b>environ 3 minutes</b>. Ensuite, si vous en avez envie, vous pourrez faire 20 cartes de plus.",
     quiet: "⚠️ Enregistrez dans un endroit calme : sans télévision, sans musique, sans personne qui parle autour de vous.",
     quiet_short: "🔇 Enregistrez dans un endroit calme",
+    too_long: "⚠️ L'enregistrement est trop long. Recommencez en répondant en quelques secondes.", mic_error: "⚠️ Le micro ne répond plus. Appuyez de nouveau sur « Enregistrer ».",
+    fail_short: "Échec de l'envoi. Vérifiez la connexion puis « Renvoyer ».", back_done: "Retour à la fin de la série",
+    prev_label: "Carte précédente", next_label: "Carte suivante",
     code_ph: "Votre code (6 caractères)", code_example: "⚠️ Ce code n'était qu'un exemple. Si vous n'avez pas de code, commencez par le consentement ci-dessous.",
     share_h: "Partager le projet 💬", share_p: "Chaque nouvelle voix compte beaucoup. Envoyez le lien à votre famille et à vos amis !",
     share_btn: "Partager", share_wa: "Envoyer sur WhatsApp", share_copy: "Copier le lien", link_copied: "Lien copié ✓",
@@ -248,7 +254,7 @@ const TEXTS = {
     q_novoice: "⚠️ Nous n'avons pas entendu votre voix. Rapprochez-vous du micro, vérifiez qu'il fonctionne, puis recommencez.",
     q_loud: "⚠️ Le son sature. Éloignez-vous un peu du micro et refaites l'enregistrement.",
     data_h: "Vos données",
-    data_what: "<b>Ce qui est collecté :</b> vos enregistrements vocaux, les images affichées et, si vous le souhaitez, votre tranche d'âge, votre genre, votre région et si vous confondez certaines couleurs. Pas de nom, pas d'adresse e-mail.",
+    data_what: "<b>Ce qui est collecté :</b> vos enregistrements vocaux, les images affichées et, si vous le souhaitez, votre tranche d'âge, votre genre, votre région et si vous confondez certaines couleurs. Le type d'appareil et l'heure de l'enregistrement sont aussi notés. Pas de nom, pas d'adresse e-mail.",
     data_use: "<b>Usage :</b> entraîner et évaluer des modèles de recherche et publier des résultats chiffrés. Les enregistrements sont stockés de façon privée et ne seront pas publiés tels quels sans un nouvel accord.",
     data_withdraw: "<b>Retrait :</b> vous recevez un code participant. Envoyez-le à {contact} pour que vos enregistrements soient supprimés.",
     data_age: "Réservé aux personnes de <b>18 ans ou plus</b>.",
@@ -298,8 +304,10 @@ function applyLang() {
   document.querySelectorAll("[data-t-placeholder]").forEach(el => { el.placeholder = t(el.dataset.tPlaceholder); });
   $("b-lang").textContent = t("other_lang");
   $("b-prev").textContent = t("prev"); $("b-next").textContent = t("next");
-  if (!recorder || recorder.state !== "recording") setBusy($("rec").disabled);
-  if ($("s-record").classList.contains("active")) render();
+  $("b-prev").setAttribute("aria-label", t("prev_label")); $("b-next").setAttribute("aria-label", t("next_label"));
+  if (recording()) { /* the timer refreshes the Stop label */ }
+  else if ($("rec").disabled) $("rec").textContent = t("sending");  // keep the upload state
+  else { setBusy(false); if ($("s-record").classList.contains("active")) render(); }
   if ($("s-done").classList.contains("active")) finishBatch();
   renderReturning();
   $("b-wa").href = "https://wa.me/?text=" + encodeURIComponent(t("wa_text", { code: code || "", url: location.origin + location.pathname }));
@@ -344,7 +352,7 @@ const QUESTIONS = {
 };
 const SERIES = { question: 4, object_question: 4, both_question: 7, plural_question: 3, free: 2 };  // 20 cards
 const N_SERIES = 5;
-const VERSION = "v16-shoe";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
+const VERSION = "v17-robust";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
 // Colour-object pairs reserved for the generalisation test: recorded like the others but never
 // used for training (each colour and object is still trained in other pairs). Fixed before collection.
 const HELD_OUT = ["red_chair", "blue_phone", "green_umbrella", "yellow_shoe", "black_cap", "white_car",
@@ -629,6 +637,19 @@ let code = "", profile = {}, prompts = [], done = new Set(), idx = 0, batch = 0;
 const batchRange = b => [b * BATCH, Math.min(prompts.length, (b + 1) * BATCH)];
 const batchDone = b => prompts.slice(...batchRange(b)).every(p => done.has(p.id));
 let stream = null, recorder = null, chunks = [], lastUrl = null, pending = null;
+let recCard = null, recTimer = null, beginning = false;  // recCard: the card and image captured when recording starts
+const MAX_REC_S = 60, MAX_AUDIO_BYTES = 4.5e6;
+const recording = () => !!(recorder && recorder.state === "recording");
+function releaseMic() { if (stream) stream.getTracks().forEach(tr => tr.stop()); stream = null; }
+async function ensureMic() {  // the track can end (phone call, app switch on iOS): ask again if needed
+  const tr = stream && stream.getAudioTracks()[0];
+  if (tr && tr.readyState === "live") return true;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(
+      { audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 } });
+    return true;
+  } catch (e) { stream = null; return false; }
+}
 
 function show(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id)); }
 function newCode() {
@@ -640,13 +661,11 @@ function setStatus(t, cls) { $("status").textContent = t; $("status").className 
 async function begin(c, prof) {
   // In-app browsers (WhatsApp, Instagram, Facebook) often have no microphone or no MediaRecorder.
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { alert(t("no_mic")); return; }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia(
-      { audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 } });
-  } catch (e) {
-    alert(e.name === "NotAllowedError" || e.name === "SecurityError" ? t("no_mic") : t("mic") + " (" + e.message + ")");
-    return;
-  }
+  if (beginning) return;  // double tap on Start / Continue
+  beginning = true;
+  const ok = await ensureMic();
+  beginning = false;
+  if (!ok) { alert(t("no_mic")); return; }
   code = c; profile = prof || store.get("profile:" + code) || {};
   store.set("profile:" + code, profile); store.set("lastCode", code);
   done = new Set(store.get("done:" + code) || []);
@@ -700,6 +719,7 @@ function startBatch(b) {
 }
 
 function finishBatch() {
+  releaseMic();  // the microphone indicator goes off between series
   const more = prompts.findIndex(p => !done.has(p.id)) >= 0;
   $("d-text").textContent = t("done_text", { n: done.size }) + t(more ? "done_more" : "done_all");
   $("b-more").style.display = more ? "" : "none";
@@ -714,9 +734,17 @@ function render() {
   const [lo, hi] = batchRange(batch), inBatch = prompts.slice(lo, hi).filter(q => done.has(q.id)).length;
   $("r-count").textContent = t("count", { b: batch + 1, i: idx - lo + 1, n: hi - lo, k: inBatch });
   $("r-bar").style.width = (100 * inBatch / (hi - lo)) + "%";
-  $("b-prev").disabled = idx === lo; $("b-next").disabled = idx === hi - 1;
+  updateNav();
   $("b-play").disabled = true; $("b-retry").style.display = "none";
   setStatus(done.has(p.id) ? t("already") : "", done.has(p.id) ? "ok" : "");
+  if (batchDone(batch)) {  // reviewing a finished series: a way back to its end screen
+    $("status").insertAdjacentHTML("beforeend", ` <button id="b-finish">${t("back_done")}</button>`);
+    $("b-finish").onclick = finishBatch;
+  }
+}
+function updateNav() {  // no navigation while recording or sending: the answer must stay with its card
+  const [lo, hi] = batchRange(batch), locked = recording() || $("rec").disabled;
+  $("b-prev").disabled = locked || idx === lo; $("b-next").disabled = locked || idx === hi - 1;
 }
 
 function mimeType() {
@@ -731,50 +759,82 @@ function mimeType() {
 function setBusy(busy) {  // no new recording while a clip is being sent
   $("rec").disabled = busy;
   $("rec").textContent = busy ? t("sending") : t("rec");
+  if (prompts.length) updateNav();
 }
 
-function toggleRecord() {
-  if (recorder && recorder.state === "recording") { recorder.stop(); return; }
-  if ($("rec").disabled) return;
+async function toggleRecord() {
+  if (recording()) { recorder.stop(); return; }
+  if ($("rec").disabled || beginning) return;
+  beginning = true;
+  const ok = await ensureMic();
+  beginning = false;
+  if (!ok) { setStatus(t("mic_error"), "err"); return; }
   chunks = [];
   const mime = mimeType();
-  recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
-  recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
-  recorder.onstop = finish;
-  recorder.start();
-  $("rec").textContent = t("stop"); $("rec").className = "recording";
+  try {
+    recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+    recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    recorder.onstop = finish;
+    recorder.onerror = () => { try { recorder.stop(); } catch (e) {} };
+    recorder.start();
+  } catch (e) { releaseMic(); setStatus(t("mic_error"), "err"); return; }
+  // The card and its image are taken now, so the answer stays with the card that was shown.
+  recCard = { p: prompts[idx], at: idx, image: $("canvas").toDataURL("image/png").split(",")[1], start: Date.now() };
+  $("rec").className = "recording"; updateNav();
+  const tick = () => {
+    const sec = Math.floor((Date.now() - recCard.start) / 1000);
+    $("rec").textContent = `${t("stop")} 0:${String(sec).padStart(2, "0")}`;
+    if (sec >= MAX_REC_S && recording()) recorder.stop();
+  };
+  tick(); recTimer = setInterval(tick, 500);
   setStatus(t("recording"), "err");
 }
 
 const toBase64 = blob => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result.split(",")[1]); f.readAsDataURL(blob); });
 
 async function finish() {
+  clearInterval(recTimer);
   $("rec").className = "primary"; setBusy(true);
   const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
   if (blob.size < 1000) {  // nothing was captured (seen on some iPhones): do not send, ask to redo the card
     setBusy(false); $("b-play").disabled = true; setStatus(t("empty_rec"), "err"); return;
   }
+  if (blob.size > MAX_AUDIO_BYTES) { setBusy(false); setStatus(t("too_long"), "err"); return; }
   if (lastUrl) URL.revokeObjectURL(lastUrl);
   lastUrl = URL.createObjectURL(blob); $("b-play").disabled = false;
-  const p = prompts[idx], q = await quality(blob);
+  const { p, at, image } = recCard, q = await quality(blob);
   pending = {
-    speaker: code, id: p.id, mime: blob.type, audio: await toBase64(blob),
-    image: $("canvas").toDataURL("image/png").split(",")[1],
+    speaker: code, id: p.id, mime: blob.type, audio: await toBase64(blob), image,
     meta: { ...p, profile, quality: q, userAgent: navigator.userAgent, recorded: new Date().toISOString() },
   };
-  send(idx);
+  send(at);
 }
 
+async function post(body) {  // one upload, abandoned after 60 s
+  const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 60000);
+  try {
+    const res = await fetch(UPLOAD_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body, signal: ctrl.signal });
+    return await res.json();
+  } finally { clearTimeout(timer); }
+}
+
+let pendingAt = 0;
 async function send(at) {
+  pendingAt = at;
   setStatus(t("sending"));
   $("b-retry").style.display = "none";
   try {
     if (!UPLOAD_URL) throw new Error(t("not_configured"));
-    const res = await fetch(UPLOAD_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(pending) });
-    const out = await res.json();
-    if (!out.ok) throw new Error(out.error || t("refused"));
+    const body = JSON.stringify(pending);
+    let out;
+    for (let attempt = 0; attempt < 3; attempt++) {  // the server answers "busy" when many people upload at once
+      out = await post(body);
+      if (!(out && out.error === "busy")) break;
+      await new Promise(r => setTimeout(r, 1500 + 2000 * attempt));
+    }
+    if (!out || !out.ok) throw new Error((out && out.error) || t("refused"));
   } catch (e) {
-    setStatus(t("fail", { e: e.message }), "err");
+    setStatus(t("fail_short") + (DEBUG ? " · " + e.message : ""), "err");
     $("b-retry").style.display = "";
     setBusy(false);
     return;
@@ -811,7 +871,7 @@ const consentOk = () => { $("b-consent").disabled = !($("c-age").checked && $("c
 $("c-age").onchange = consentOk; $("c-ok").onchange = consentOk;
 // Resuming with a typed code still goes through the consent (someone new could type a code they were given).
 let resumeCode = "";
-$("b-consent").onclick = () => resumeCode ? begin(resumeCode) : show("s-profile");
+$("b-consent").onclick = () => resumeCode ? begin(resumeCode) : show("s-profile");  // begin() ignores a double tap
 const siteUrl = () => location.origin + location.pathname;
 if (navigator.share) $("b-share").style.display = "";
 $("b-share").onclick = () => navigator.share({ title: "Alwan bdarija", text: t("invite"), url: siteUrl() }).catch(() => {});
@@ -819,13 +879,18 @@ $("b-share-copy").onclick = async () => {
   const text = t("invite") + "\n" + siteUrl();
   try { await navigator.clipboard.writeText(text); $("b-share-copy").textContent = t("link_copied"); } catch (e) { prompt(t("share_copy"), text); }
 };
-$("b-ret-continue").onclick = () => begin(store.get("lastCode"));
+$("b-ret-continue").onclick = () => {  // a remembered code also goes through the consent (the phone may be someone else's)
+  resumeCode = store.get("lastCode");
+  $("ret-known").style.display = "none";
+  $("c-age").scrollIntoView({ behavior: "smooth", block: "center" });
+};
 $("b-ret-new").onclick = () => { $("ret-known").style.display = "none"; $("ret-code").style.display = "none"; };
 $("b-copy").onclick = async () => {
   try { await navigator.clipboard.writeText(code); $("b-copy").textContent = t("copied"); } catch (e) { prompt(t("copy_code"), code); }
 };
 $("b-other").onclick = () => {  // hand the device to someone else: new person, new code
-  code = ""; done = new Set(); prompts = []; resumeCode = "";
+  code = ""; done = new Set(); prompts = []; resumeCode = ""; pending = null;
+  releaseMic(); store.set("lastCode", null);
   $("c-age").checked = $("c-ok").checked = false; consentOk();
   ["p-age", "p-gender", "p-region", "p-vision", "p-code"].forEach(id => $(id).value = "");
   $("ret-known").style.display = "none"; $("ret-code").style.display = "none";
@@ -835,7 +900,7 @@ $("b-start").onclick = () => begin(newCode(), { age: $("p-age").value, gender: $
                                                colour_vision: $("p-vision").value });  // optional; colour-blind answers analysed apart
 $("b-resume").onclick = () => {
   const c = $("p-code").value.trim().toUpperCase();
-  if (!/^[A-Z0-9]{6}$/.test(c)) return alert(t("bad_code"));
+  if (!/^[A-HJ-NP-Z2-9]{6}$/.test(c)) return alert(t("bad_code"));  // generated codes never contain 0, 1, O or I
   if (c === "K7Q2M9") return alert(t("code_example"));  // the example once shown in this field
   resumeCode = c;
   $("ret-code").style.display = "none";
@@ -843,14 +908,14 @@ $("b-resume").onclick = () => {
 };
 $("rec").onclick = toggleRecord;
 $("b-play").onclick = () => new Audio(lastUrl).play();
-$("b-retry").onclick = () => { if (pending) { setBusy(true); send(idx); } };
+$("b-retry").onclick = () => { if (pending) { setBusy(true); send(pendingAt); } };
 $("b-prev").onclick = () => { if (idx > batchRange(batch)[0]) { idx--; render(); } };
 $("b-next").onclick = () => { if (idx < batchRange(batch)[1] - 1) { idx++; render(); } };
 $("b-review").onclick = () => { idx = batchRange(batch)[0]; show("s-record"); render(); };
 $("b-more").onclick = () => startBatch(Math.floor(prompts.findIndex(p => !done.has(p.id)) / BATCH));
 document.addEventListener("keydown", e => {
-  if (!$("s-record").classList.contains("active") || e.target.tagName === "INPUT") return;
-  if (e.code === "Space") { e.preventDefault(); toggleRecord(); }
+  if (!$("s-record").classList.contains("active") || ["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName) || e.repeat) return;
+  if (e.code === "Space") { if (e.target.tagName === "BUTTON") return; e.preventDefault(); toggleRecord(); }
   else if (e.key === (lang === "ar" ? "ArrowLeft" : "ArrowRight")) $("b-next").click();
   else if (e.key === (lang === "ar" ? "ArrowRight" : "ArrowLeft")) $("b-prev").click();
 });
