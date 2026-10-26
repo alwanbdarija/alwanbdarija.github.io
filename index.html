@@ -326,7 +326,7 @@ const QUESTIONS = {
 };
 const SERIES = { question: 4, object_question: 4, both_question: 7, plural_question: 3, free: 2 };  // 20 cards
 const N_SERIES = 5;
-const VERSION = "v13-cup-pen";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
+const VERSION = "v14-background";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
 // Colour-object pairs reserved for the generalisation test: recorded like the others but never
 // used for training (each colour and object is still trained in other pairs). Fixed before collection.
 const HELD_OUT = ["red_chair", "blue_phone", "green_umbrella", "yellow_shoe", "black_cap", "white_car",
@@ -386,13 +386,22 @@ function promptsFor(code) {
   return prompts;
 }
 
+// Background: white objects need a dark background and black ones a light one. The dark background is
+// also used for light colours (yellow, pink, orange), so that it no longer signals "white": participants
+// describe the background ("والخلفية جري"), and a background seen only with white would tie "grey" to white.
+const DARK_BG = ["#5f6368", "#7a7f87"], LIGHT_BG = ["#f4f1ea", "#e8eef3", "#ececec", "#d9d9d9"];
+function background(color, rng) {
+  if (color === "white") return choice(rng, DARK_BG);
+  if (color === "black") return choice(rng, LIGHT_BG.slice(0, 3));
+  if (["yellow", "pink", "orange"].includes(color) && rng() < .35) return choice(rng, DARK_BG);
+  return choice(rng, LIGHT_BG);
+}
+
 function makeCard({ t, color, object, grid }, rng) {
-  const light = COLORS[color][5];
   return {
     id: `${color}_${object}_${t}`, color, template: t, object, gender: OBJECTS[object][2] ? "f" : "m",
     hex: shade(color, rng),
-    background: choice(rng, light > .9 ? ["#5f6368", "#7a7f87"] : light < .15 ? ["#f4f1ea", "#e8eef3", "#ececec"]
-                                        : ["#f4f1ea", "#e8eef3", "#ececec", "#d9d9d9"]),
+    background: background(color, rng),
     count: t === "plural_question" ? 2 : 1, text: QUESTIONS[t][0],
     grid, held_out: HELD_OUT.includes(`${color}_${object}`), version: VERSION,
   };

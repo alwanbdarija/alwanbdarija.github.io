@@ -37,7 +37,8 @@ and the current centre ([docs/couleurs_reference.png](docs/couleurs_reference.pn
    the centre is their average; yellow is made slightly more golden; orange, pink and grey, on which the two languages
    differ, stay close to typical values.
 4. **How they are shown.** One colour per object, neutral grey outline, inner shading within ±6 % (a darker orange reads
-   as brown, a lighter red as pink); neutral backgrounds (dark grey behind white objects, light behind black ones).
+   as brown, a lighter red as pink); neutral backgrounds: dark grey behind white objects, light behind black ones, and dark grey also for about a third of
+   the yellow, pink and orange cards, so that the background does not reveal the colour (participants describe it).
 
 Limits: Berlin & Kay often had a single speaker per language; Lebanese Arabic is not Darija (e.g. purple is ليلكي there,
 موف or قوقي in Darija); their colour chips are printed, less saturated than a screen; participants' screens are not
