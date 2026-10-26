@@ -62,7 +62,7 @@ Criteria:
    Removed for this reason: heart (typically red) and box (typically brown cardboard).
 2. **Recognised at a glance in a simple drawing, with one obvious name.** A drawing that can be named as something
    else gives a wrong label: the ball is drawn as a shaded ball with seams (not a flat circle), the bag as a
-   handbag (not an envelope), the cup as a teacup on its saucer (a bucket-like cup, then a mug read as a jug, were rejected), the phone as a desk telephone (a smartphone screen would
+   handbag (not an envelope), the cup as a teacup on its saucer (a bucket-like cup, then a mug read as a jug, were rejected), the shoe as a laced sneaker (a flat shoe was named as a slipper), the phone as a desk telephone (a smartphone screen would
    add a second colour). The pen is drawn in writing position, tip down with a small black point (pointing up, it was read as a rocket).
    Not kept: a book (could be named as a notebook, كناش) and a sandal (unclear when drawn).
 3. **Its name does not sound like a colour word.** Removed: flower (وردة, too close to وردي, pink).

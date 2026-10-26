@@ -344,7 +344,7 @@ const QUESTIONS = {
 };
 const SERIES = { question: 4, object_question: 4, both_question: 7, plural_question: 3, free: 2 };  // 20 cards
 const N_SERIES = 5;
-const VERSION = "v15-plural";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
+const VERSION = "v16-shoe";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
 // Colour-object pairs reserved for the generalisation test: recorded like the others but never
 // used for training (each colour and object is still trained in other pairs). Fixed before collection.
 const HELD_OUT = ["red_chair", "blue_phone", "green_umbrella", "yellow_shoe", "black_cap", "white_car",
@@ -561,13 +561,25 @@ const SHAPES = {
     c.beginPath(); pts.forEach(([u, v], i) => (i ? c.lineTo : c.moveTo).call(c, x + u * s, y + v * s));
     c.quadraticCurveTo(x, y - .2 * s, x - .1 * s, y - .32 * s); c.closePath(); c.fill(); c.stroke();
   },
+  // A laced sneaker, not a slipper: high collar, tongue, crossed laces with eyelets, toe cap, thick sole.
   shoe(c, x, y, s, col) {
     const P = (u, v) => [x + u * s, y + v * s];
-    c.beginPath(); c.moveTo(...P(-.44, .14)); c.lineTo(...P(-.44, -.06)); c.quadraticCurveTo(...P(-.42, -.2), ...P(-.3, -.2));
-    c.lineTo(...P(-.08, -.2)); c.lineTo(...P(0, -.06)); c.quadraticCurveTo(...P(.32, -.04), ...P(.44, .08)); c.lineTo(...P(.44, .14));
-    c.closePath(); c.fill(); c.stroke();
-    c.fillStyle = adjust(col, 0.06); c.beginPath(); c.rect(...P(-.46, .14), .92 * s, .09 * s); c.fill(); c.stroke();
-    c.beginPath(); for (const u of [.04, .12, .2]) { c.moveTo(...P(u - .03, -.05)); c.lineTo(...P(u + .03, .02)); } c.stroke();
+    c.fillStyle = col;
+    c.beginPath(); c.moveTo(...P(-.46, .14)); c.lineTo(...P(-.46, -.08)); c.quadraticCurveTo(...P(-.45, -.26), ...P(-.3, -.27));
+    c.lineTo(...P(-.16, -.24)); c.lineTo(...P(-.08, -.36)); c.quadraticCurveTo(...P(-.02, -.4), ...P(.02, -.33));
+    c.lineTo(...P(.12, -.08)); c.quadraticCurveTo(...P(.38, -.04), ...P(.47, .07)); c.lineTo(...P(.47, .14));
+    c.closePath(); c.fill(); c.stroke();                                                                        // upper with tongue
+    c.beginPath(); c.moveTo(...P(.26, .14)); c.quadraticCurveTo(...P(.28, -.02), ...P(.44, .02)); c.stroke();   // toe cap
+    c.beginPath(); c.moveTo(...P(-.42, -.1)); c.quadraticCurveTo(...P(-.3, -.14), ...P(-.22, -.06)); c.stroke(); // heel seam
+    const eyes = [[-.13, -.2], [-.07, -.13], [-.01, -.06]], eyes2 = [[-.03, -.27], [.03, -.2], [.09, -.12]];
+    c.beginPath(); for (let i = 0; i < 3; i++) {                                                                // crossed laces
+      c.moveTo(...P(...eyes[i])); c.lineTo(...P(...eyes2[i]));
+      if (i < 2) { c.moveTo(...P(...eyes[i])); c.lineTo(...P(...eyes2[i + 1])); }
+    } c.lineWidth *= 1.6; c.stroke(); c.lineWidth /= 1.6;
+    c.fillStyle = adjust(col, .06);
+    c.beginPath(); c.moveTo(...P(-.48, .14)); c.lineTo(...P(.48, .14)); c.quadraticCurveTo(...P(.52, .19), ...P(.46, .24));
+    c.lineTo(...P(-.46, .24)); c.quadraticCurveTo(...P(-.5, .19), ...P(-.48, .14)); c.closePath(); c.fill(); c.stroke();  // sole
+    c.beginPath(); for (let u = -.4; u < .44; u += .08) { c.moveTo(...P(u, .24)); c.lineTo(...P(u + .03, .2)); } c.stroke();  // tread
   },
   key(c, x, y, s, col, bg) {
     const P = (u, v) => [x + u * s, y + v * s];
