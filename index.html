@@ -145,7 +145,7 @@
       <label for="p-vision" data-t="vision"></label>
       <select id="p-vision"><option value="">—</option><option value="no" data-t="v_no"></option><option value="yes" data-t="v_yes"></option><option value="unsure" data-t="v_unsure"></option></select>
       <label for="p-region" data-t="region"></label>
-      <input type="text" id="p-region" maxlength="60" data-t-placeholder="region_ph">
+      <select id="p-region"><option value="">—</option><option value="tanger-tetouan-alhoceima" data-t="r_tanger_tetouan_alhoceima"></option><option value="oriental" data-t="r_oriental"></option><option value="fes-meknes" data-t="r_fes_meknes"></option><option value="rabat-sale-kenitra" data-t="r_rabat_sale_kenitra"></option><option value="beni-mellal-khenifra" data-t="r_beni_mellal_khenifra"></option><option value="casablanca-settat" data-t="r_casablanca_settat"></option><option value="marrakech-safi" data-t="r_marrakech_safi"></option><option value="draa-tafilalet" data-t="r_draa_tafilalet"></option><option value="souss-massa" data-t="r_souss_massa"></option><option value="guelmim-oued-noun" data-t="r_guelmim_oued_noun"></option><option value="laayoune-sakia-elhamra" data-t="r_laayoune_sakia_elhamra"></option><option value="dakhla-oued-eddahab" data-t="r_dakhla_oued_eddahab"></option><option value="abroad" data-t="r_abroad"></option></select>
       <div class="controls"><button class="primary" id="b-start" data-t="start"></button></div>
     </div>
   </section>
@@ -246,7 +246,8 @@ const TEXTS = {
     prof_p: "كيعاونونا نعرفو واش البرنامج كيفهم كاع اللهجات.",
     age: "شحال فعمرك", gender: "الجنس", g_f: "مرا", g_m: "راجل", g_x: "ما بغيتش نقول",
     vision: "واش كتخلط بين شي ألوان (مثلا الحمر والخضر)؟", v_no: "لا", v_yes: "آه", v_unsure: "ما عرفتش",
-    region: "المدينة ولا المنطقة اللي تربيتي فيها", region_ph: "مثلا: فاس، كازا، سوس…",
+    region: "الجهة اللي تربيتي فيها",
+    r_tanger_tetouan_alhoceima: "طنجة - تطوان - الحسيمة", r_oriental: "الشرق", r_fes_meknes: "فاس - مكناس", r_rabat_sale_kenitra: "الرباط - سلا - القنيطرة", r_beni_mellal_khenifra: "بني ملال - خنيفرة", r_casablanca_settat: "الدار البيضاء - سطات", r_marrakech_safi: "مراكش - آسفي", r_draa_tafilalet: "درعة - تافيلالت", r_souss_massa: "سوس - ماسة", r_guelmim_oued_noun: "كلميم - واد نون", r_laayoune_sakia_elhamra: "العيون - الساقية الحمراء", r_dakhla_oued_eddahab: "الداخلة - وادي الذهب", r_abroad: "خارج المغرب",
     start: "بدا التسجيل",
     code_h: "عندك ديجا كود؟", code_p: "باش تكمّل من تيليفون ولا بيسي آخر، دخّل الكود ديالك.", resume: "كمّل",
     code_label: "الكود ديالك:",
@@ -308,7 +309,8 @@ const TEXTS = {
     prof_p: "Elles aident à savoir si le modèle comprend tous les accents.",
     age: "Tranche d'âge", gender: "Genre", g_f: "Femme", g_m: "Homme", g_x: "Je préfère ne pas dire",
     vision: "Confondez-vous certaines couleurs (par exemple le rouge et le vert) ?", v_no: "Non", v_yes: "Oui", v_unsure: "Je ne sais pas",
-    region: "Ville ou région où vous avez grandi", region_ph: "ex. Fès, Casablanca, Souss…",
+    region: "Région où vous avez grandi",
+    r_tanger_tetouan_alhoceima: "Tanger-Tétouan-Al Hoceïma", r_oriental: "L'Oriental", r_fes_meknes: "Fès-Meknès", r_rabat_sale_kenitra: "Rabat-Salé-Kénitra", r_beni_mellal_khenifra: "Béni Mellal-Khénifra", r_casablanca_settat: "Casablanca-Settat", r_marrakech_safi: "Marrakech-Safi", r_draa_tafilalet: "Drâa-Tafilalet", r_souss_massa: "Souss-Massa", r_guelmim_oued_noun: "Guelmim-Oued Noun", r_laayoune_sakia_elhamra: "Laâyoune-Sakia El Hamra", r_dakhla_oued_eddahab: "Dakhla-Oued Ed-Dahab", r_abroad: "Hors du Maroc",
     start: "Commencer l'enregistrement",
     code_h: "Vous avez déjà un code ?", code_p: "Pour reprendre sur un autre appareil, entrez votre code participant.", resume: "Reprendre",
     code_label: "Code participant :",
@@ -395,7 +397,7 @@ const QUESTIONS = {
 };
 const SERIES = { question: 4, object_question: 4, both_question: 7, plural_question: 3, free: 2 };  // 20 cards
 const N_SERIES = 5;
-const VERSION = "v17-robust";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
+const VERSION = "v18-region";  // questionnaire version, saved with every recording (see EXPERIENCE.md)
 // Colour-object pairs reserved for the generalisation test: recorded like the others but never
 // used for training (each colour and object is still trained in other pairs). Fixed before collection.
 const HELD_OUT = ["red_chair", "blue_phone", "green_umbrella", "yellow_shoe", "black_cap", "white_car",
@@ -947,7 +949,8 @@ $("b-other").onclick = () => {  // hand the device to someone else: new person, 
   $("ret-known").style.display = "none"; $("ret-code").style.display = "none";
   show("s-consent"); window.scrollTo(0, 0);
 };
-$("b-start").onclick = () => begin(newCode(), { age: $("p-age").value, gender: $("p-gender").value, region: $("p-region").value.trim(),
+$("b-start").onclick = () => begin(newCode(), { age: $("p-age").value, gender: $("p-gender").value, region: $("p-region").value,  // region code (12 regions of Morocco, or abroad)
+                                              
                                                colour_vision: $("p-vision").value });  // optional; colour-blind answers analysed apart
 $("b-resume").onclick = () => {
   const c = $("p-code").value.trim().toUpperCase();
