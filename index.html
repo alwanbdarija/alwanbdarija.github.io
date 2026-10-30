@@ -29,7 +29,9 @@
           background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'><g fill='none' stroke='%23ffffff' stroke-opacity='.22' stroke-width='1.5'><rect x='12' y='12' width='24' height='24'/><rect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/><circle cx='24' cy='24' r='5'/></g></svg>"), linear-gradient(135deg, #2f4bd1, #1d7a6e); }
   .hero .sub { color: rgba(255,255,255,.88); font-size: .95rem; margin: 2px 0 14px; }
   .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-  .lang { padding: 5px 10px; font-size: .85rem; flex: none; background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.45); }
+  .langs { display: flex; gap: 4px; flex: none; }
+  .lang.on { background: #fff; color: var(--accent); font-weight: 700; }
+  .lang { padding: 5px 9px; font-size: .82rem; flex: none; background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.45); }
   .swatches { display: flex; height: 12px; margin: 0 -16px; }
   .swatches span { flex: 1; }
   .landing { text-align: center; padding: 18px 4px 6px; }
@@ -83,7 +85,7 @@
 <body>
 <main>
   <header class="hero">
-    <div class="top"><h1>Alwan bdarija · ألوان بالدارجة</h1><button id="b-lang" class="lang"></button></div>
+    <div class="top"><h1>Alwan bdarija · ألوان بالدارجة</h1><div class="langs" role="group" aria-label="Language"><button class="lang" data-lang="ar">الدارجة</button><button class="lang" data-lang="fr">FR</button><button class="lang" data-lang="en">EN</button></div></div>
     <div class="sub" data-t="subtitle"></div>
     <div class="swatches" id="swatches" aria-hidden="true"></div>
   </header>
@@ -270,7 +272,7 @@ const TEXTS = {
     done_h: "شكرا بزاف!", done_text: "سالات هاد السلسلة: سجلتي {n} بطاقة فالمجموع.",
     done_more: " إلا عندك شوية د الوقت، سلسلة أخرى غادي تعاونا بزاف.", done_all: " كمّلتي كاع البطاقات!",
     done_code: "الكود ديالك (خليه عندك إلا بغيتي من بعد نمسحو التسجيلات ديالك):",
-    more: "سلسلة أخرى", review: "شوف هاد السلسلة", team: "الفريق ديال المشروع", other_lang: "Français",
+    more: "سلسلة أخرى", review: "شوف هاد السلسلة", team: "الفريق ديال المشروع",
   },
   fr: {
     subtitle: "Prêtez votre voix : nommez des couleurs et des objets en darija.",
@@ -333,21 +335,85 @@ const TEXTS = {
     done_h: "Merci beaucoup !", done_text: "Cette série est terminée : {n} cartes enregistrées au total.",
     done_more: " Si vous avez encore un peu de temps, une autre série nous aiderait beaucoup.", done_all: " Vous avez fait toutes les cartes !",
     done_code: "Votre code participant (à garder pour un éventuel retrait) :",
-    more: "Encore une série", review: "Revoir cette série", team: "l'équipe du projet", other_lang: "الدارجة",
+    more: "Encore une série", review: "Revoir cette série", team: "l'équipe du projet",
+  },
+  en: {
+    subtitle: "Lend your voice: name colours and objects in Darija.",
+    about_h: "What is this about?",
+    about_p1: "A scientific research project on Moroccan Darija. We are collecting recordings of people from different regions naming colours and objects in Darija.",
+    about_p2: "You will see <b>20 pictures</b> of coloured objects, each with a short question: answer out loud, in Darija, in your own words. It takes <b>about 3 minutes</b>. Afterwards, if you like, you can do 20 more cards.",
+    quiet: "⚠️ Record in a quiet place: no TV, no music, nobody talking around you.",
+    quiet_short: "🔇 Record in a quiet place",
+    land_tag: "Lend your voice for 3 minutes to research on Darija 🇲🇦", land_cta: "Start",
+    land_f1: "⏱️ about 3 minutes", land_f2: "🔒 anonymous", land_f3: "📱 on your phone",
+    how_h: "How does it work?", how_1: "You see a coloured object", how_2: "You answer out loud, in Darija, in your own words", how_3: "Your voice helps research on Darija",
+    too_long: "⚠️ The recording is too long. Record again and answer in a few seconds.", mic_error: "⚠️ The microphone stopped responding. Tap “Record” again.",
+    fail_short: "Upload failed. Check your connection, then tap “Send again”.", back_done: "Back to the end of the series",
+    prev_label: "Previous card", next_label: "Next card",
+    code_ph: "Your code (6 characters)", code_example: "⚠️ This code was only an example. If you have no code, start with the consent below.",
+    share_h: "Share the project 💬", share_p: "Every new voice matters. Send the link to your family and friends!",
+    share_btn: "Share", share_wa: "Send on WhatsApp", share_copy: "Copy the link", link_copied: "Link copied ✓",
+    invite: "Hi! I'm taking part in a research project on Darija 🇲🇦: you see pictures of coloured objects and say, out loud and in Darija, what you see. About 3 minutes, anonymous. Find a quiet place 🙏",
+    empty_rec: "⚠️ Nothing was recorded. Please record this card again.",
+    ret_h: "Welcome back!", ret_continue: "Continue with your code {code}", ret_new: "Someone else? Start with a new code",
+    copy_code: "Copy the code", copied: "Copied ✓", wa_code: "Send it to me on WhatsApp", other_person: "Someone else wants to record?",
+    wa_text: "My Alwan bdarija code: {code}\n{url}",
+    no_mic: "⚠️ This browser does not let us use the microphone. If you opened the link from WhatsApp, Instagram or Facebook: tap ⋮ or ⋯ and choose “Open in Chrome” or “Open in Safari”, then allow the microphone.",
+    q_noisy: "⚠️ This recording is noisy. Please redo it in a quieter place.",
+    q_novoice: "⚠️ We could not hear your voice. Move closer to the microphone, check that it works, then try again.",
+    q_loud: "⚠️ The sound is saturated. Move a little away from the microphone and record again.",
+    data_h: "Your data",
+    data_what: "<b>What is collected:</b> your voice recordings, the pictures shown and, if you wish, your age group, gender, region and whether you confuse some colours. The type of device and the time of recording are also noted. No name, no e-mail address.",
+    data_use: "<b>Use:</b> training and evaluating research models and publishing quantitative results. Recordings are stored privately and will not be published as they are without asking you again.",
+    data_withdraw: "<b>Withdrawal:</b> you receive a participant code. Send it to {contact} to have your recordings deleted.",
+    data_age: "For people aged <b>18 or over</b>.",
+    c_age: "I am 18 or over.",
+    c_ok: "I have read this information and agree that my recordings are used for this research.",
+    continue: "Continue",
+    prof_h: "A few questions (optional)",
+    prof_p: "They help us check that the model understands all accents.",
+    age: "Age group", gender: "Gender", g_f: "Woman", g_m: "Man", g_x: "I prefer not to say",
+    vision: "Do you confuse some colours (for example red and green)?", v_no: "No", v_yes: "Yes", v_unsure: "I don't know",
+    region: "Region where you grew up",
+    r_tanger_tetouan_alhoceima: "Tanger-Tétouan-Al Hoceïma", r_oriental: "Oriental", r_fes_meknes: "Fès-Meknès", r_rabat_sale_kenitra: "Rabat-Salé-Kénitra", r_beni_mellal_khenifra: "Béni Mellal-Khénifra", r_casablanca_settat: "Casablanca-Settat", r_marrakech_safi: "Marrakech-Safi", r_draa_tafilalet: "Drâa-Tafilalet", r_souss_massa: "Souss-Massa", r_guelmim_oued_noun: "Guelmim-Oued Noun", r_laayoune_sakia_elhamra: "Laâyoune-Sakia El Hamra", r_dakhla_oued_eddahab: "Dakhla-Oued Ed-Dahab", r_abroad: "Outside Morocco",
+    start: "Start recording",
+    code_h: "Already have a code?", code_p: "To continue on another device, enter your participant code.", resume: "Continue",
+    code_label: "Participant code:",
+    count: "series {b} · card {i} / {n} · {k} recorded",
+    rec: "● Record", stop: "■ Stop", sending: "Sending…", play: "▶ Listen again", retry: "↻ Send again",
+    prev: "←", next: "→",
+    tips_h: "Tips",
+    tips: "<li>Quiet place, phone or microphone about 20 cm away.</li>"
+        + "<li>Tap Record, wait half a second, speak, then tap Stop.</li>"
+        + "<li>Answer with the words you normally use: there is no wrong answer.</li>"
+        + "<li>“Describe the picture”: talk freely about the picture in Darija, in one or two sentences.</li>"
+        + "<li>On a computer: <kbd>Space</kbd> to record and stop, the arrows to move between cards.</li>",
+    hint_colour: "Say the name of this colour, with the word you normally use", hint_object: "Say the name of this object, with the word you normally use",
+    hint_both: "Say what it is and what colour, in your own words", hint_plural: "Look carefully: say how many there are and what they are, in your own words",
+    free: "Describe the picture freely in Darija, in 1 or 2 sentences",
+    already: "Already recorded ✓ (you can redo it)", recording: "Recording… speak, then tap Stop.",
+    saved: "Recorded ✓", fail: "Upload failed ({e}). Check your connection, then tap “Send again”.",
+    not_configured: "site not configured yet", refused: "refused",
+    mic: "The microphone is needed to take part.", bad_code: "The code has 6 characters (letters and digits).",
+    done_h: "Thank you very much!", done_text: "This series is finished: {n} cards recorded in total.",
+    done_more: " If you have a little more time, another series would help us a lot.", done_all: " You have done all the cards!",
+    done_code: "Your participant code (keep it in case you want your recordings deleted):",
+    more: "Another series", review: "Review this series", team: "the project team",
   },
 };
-let lang = store.get("lang") === "fr" ? "fr" : "ar";
+let lang = ["fr", "en"].includes(store.get("lang")) ? store.get("lang") : "ar";
 const t = (key, vars = {}) => TEXTS[lang][key].replace(/\{(\w+)\}/g, (_, k) => vars[k]);
 function contactHtml() {
   if (!CONTACT) return t("team");
-  const subject = encodeURIComponent(lang === "ar" ? "ألوان بالدارجة: نمسحو التسجيلات ديالي" : "Alwan bdarija : suppression de mes enregistrements");
+  const subject = encodeURIComponent({ ar: "ألوان بالدارجة: نمسحو التسجيلات ديالي", fr: "Alwan bdarija : suppression de mes enregistrements",
+                                       en: "Alwan bdarija: delete my recordings" }[lang]);
   return `<a href="mailto:${CONTACT}?subject=${subject}">${CONTACT}</a>`;
 }
 function applyLang() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   document.querySelectorAll("[data-t]").forEach(el => { el.innerHTML = t(el.dataset.t, { contact: contactHtml() }); });
   document.querySelectorAll("[data-t-placeholder]").forEach(el => { el.placeholder = t(el.dataset.tPlaceholder); });
-  $("b-lang").textContent = t("other_lang");
+  document.querySelectorAll(".langs .lang").forEach(b => { const on = b.dataset.lang === lang; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
   $("b-prev").textContent = t("prev"); $("b-next").textContent = t("next");
   $("b-prev").setAttribute("aria-label", t("prev_label")); $("b-next").setAttribute("aria-label", t("next_label"));
   if (recording()) { /* the timer refreshes the Stop label */ }
@@ -850,7 +916,7 @@ async function finish() {
   const { p, at, image } = recCard, q = await quality(blob);
   pending = {
     speaker: code, id: p.id, mime: blob.type, audio: await toBase64(blob), image,
-    meta: { ...p, profile, quality: q, userAgent: navigator.userAgent, recorded: new Date().toISOString() },
+    meta: { ...p, profile, quality: q, ui_lang: lang, userAgent: navigator.userAgent, recorded: new Date().toISOString() },
   };
   send(at);
 }
@@ -918,7 +984,7 @@ $("swatches").innerHTML = Object.keys(COLORS).map(c => SHADES[c].map(([a, b]) =>
     draw({ object: o, hex: hslHex((h + 360) % 360, sat, l), background: "rgba(0,0,0,0)", count: 1 }, cv);
   });
 $("b-land").onclick = () => $("consent-card").scrollIntoView({ behavior: "smooth", block: "start" });
-$("b-lang").onclick = () => { lang = lang === "ar" ? "fr" : "ar"; store.set("lang", lang); applyLang(); };
+document.querySelectorAll(".langs .lang").forEach(b => b.onclick = () => { lang = b.dataset.lang; store.set("lang", lang); applyLang(); });
 applyLang();
 const consentOk = () => { $("b-consent").disabled = !($("c-age").checked && $("c-ok").checked); };
 $("c-age").onchange = consentOk; $("c-ok").onchange = consentOk;
